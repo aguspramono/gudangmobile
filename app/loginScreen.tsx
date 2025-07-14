@@ -14,6 +14,7 @@ import { logRequest } from "./../func/logFunc"
 import { router, useFocusEffect } from "expo-router";
 import { useShallow } from "zustand/react/shallow";
 import useLogin from "./../func/store/useUserLogin";
+import { saveToken } from './../func/global/authStorage';
 
 const LoginScreen = () => {
   const [user, setUser] = useState('');
@@ -56,19 +57,21 @@ const LoginScreen = () => {
     bodyFormData.append('password', password);
 
     logRequest(bodyFormData)
-      .then(response => {
+      .then(async response => {
         if(response["status"]=="error"){
           Alert.alert('Error', response["message"]);
           return;
         }else{
+          await saveToken(user);
           setNamaUser(response.datauser[0]["NamaPeg"]);
           setUserName(user);
           setLogin(true);
+          saveToken(user);
           router.navigate("homeScreen");
         }
       })
       .catch(error => {
-        Alert.alert('Error', 'Login gagal. Silakan coba lagi.');
+        Alert.alert('Error', error);
       });
   };
 

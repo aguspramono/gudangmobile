@@ -14,3 +14,15 @@ export const logRequest = async (data: FormData) => {
     throw error;
   }
 };
+
+
+export const checkToken = async (data: FormData) => {
+  try {
+    const response = await axios.post(`${baseUrl}/checktoken`, data, { headers });
+    return response.data;
+  } catch (error) {
+    console.error("Error logging request:", error);
+    throw error;
+  }
+};
+
