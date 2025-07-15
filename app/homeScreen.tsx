@@ -70,6 +70,10 @@ export default function HomeScreen() {
     ]).start();
   };
 
+  const handleProfile = () =>{
+    router.navigate('profileScreen');
+  }
+
   const handlePressOrderBarang = (itemId) => {
     router.navigate({ pathname: "detailPesanBarang", params: { id: itemId } });
     setSelectedOrderBarang(itemId);
@@ -138,8 +142,8 @@ export default function HomeScreen() {
 
 
       <View style={styles.headerProfile}>
-        <Text style={{ color: '#585858', fontWeight: 'bold', fontSize: 16 }}>Selamat Pagi, {namaUser.toUpperCase()}!</Text>
-        <TouchableOpacity style={styles.avatarContainer}>
+        <Text style={{ color: '#585858', fontWeight: 'bold', fontSize: 16,textTransform:'capitalize' }}>Selamat Pagi, {namaUser}!</Text>
+        <TouchableOpacity style={styles.avatarContainer} onPress={handleProfile}>
           <Image
             source={{ uri: 'https://i.pravatar.cc/100' }} // Ganti dengan avatar user
             style={styles.avatar}
@@ -180,14 +184,10 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    resizeMode: 'cover',
-  },
   container: {
     flex: 1,
     backgroundColor: 'transparent',
-    marginTop: 20,
+    marginTop: 50,
     paddingHorizontal: 20,
   },
 

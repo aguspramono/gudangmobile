@@ -202,7 +202,7 @@ function detailPesanBarang() {
 
     return (
         <View style={styles.container}>
-            <StatusBar style="light" />
+            
             <View style={{ flexDirection: "row", marginBottom: 10 }}>
                 <TouchableOpacity onPress={handleBack} style={{
                     padding: 15,
@@ -226,7 +226,7 @@ function detailPesanBarang() {
                     <View key={i} style={{ padding: 10, backgroundColor: '#A0C4FF20', borderRadius: 10 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: item["statusdiset"] == "pending" ? '#FFD666' : item["statusdiset"] == "onprocess" ? '#A0C4FF' : item["statusdiset"] == "rejected" ? '#FFB6B6' : '#9DE0AD', paddingHorizontal: 10, paddingVertical: 3, marginBottom: 10 }}>
                             <Text style={{ color: "#585858", fontSize: 12, textTransform: 'capitalize' }}>
-                                {(item["statusdiset"] == "pending" || item.diketahui == "pending" ? "Menunggu" : (item["statusdiset"] == null || item["statusdiset"] == "" ? "Disetujui" : item["statusdiset"]))}
+                                {(item["statusdiset"] == "pending" || item.diketahui == "pending" ? "Menunggu" : (item["statusdiset"] == null || item["statusdiset"] == "" || item["statusdiset"] == "done" ? "Selesai" : item["statusdiset"]))}
                             </Text>
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -376,6 +376,7 @@ function detailPesanBarang() {
                 textconfirmacc=""
                 textconfirmdec=""
             />
+            <StatusBar style="light" />
         </View>
     );
 }
@@ -387,7 +388,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'transparent',
-        marginTop: 20,
+        marginTop: 50,
         paddingHorizontal: 20,
     },
 });

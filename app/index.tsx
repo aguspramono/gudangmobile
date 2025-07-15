@@ -4,20 +4,21 @@ import {
   StyleSheet,
   Pressable,
   ImageBackground,
+  Alert,
+  BackHandler,
+  ToastAndroid 
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getToken } from './../func/global/authStorage';
 import { useShallow } from "zustand/react/shallow";
 import useLogin from "./../func/store/useUserLogin";
 import { checkToken } from "./../func/logFunc"
-
-
+import { useFocusEffect } from '@react-navigation/native';
 
 function Splash() {
-   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
-
+  const lastBackPressed = useRef(0);
   const {
     isLogin,
     setLogin,
@@ -31,41 +32,64 @@ function Splash() {
       setLogin: state.setLogin,
       userName: state.userName,
       setUserName: state.setUserName,
-      namaUser:state.namaUser,
-      setNamaUser:state.setNamaUser
+      namaUser: state.namaUser,
+      setNamaUser: state.setNamaUser
 
     }))
   );
 
   const checkLogin = async () => {
-    
-        const token = await getToken();
-        var bodyFormData = new FormData();
-        bodyFormData.append('token', token);
+    const token = await getToken();
+    if (token === null) {
+      router.navigate("/");
+    } else {
+      var bodyFormData = new FormData();
+      bodyFormData.append('token', token);
+      checkToken(bodyFormData)
+        .then(response => {
+          if (response["status"] === "error") {
+            Alert.alert(response["message"]);
+            router.navigate("/");
+          } else {
+            setNamaUser(response.datauser[0]["NamaPeg"]);
+            setUserName(response.datauser[0]["Username"]);
+            setLogin(true);
+          }
+        })
+        .catch(error => {
+          console.log('Error', error);
+        });
+      router.navigate("homeScreen");
+    }
+  };
 
-          checkToken(bodyFormData)
-            .then(async response => {
 
-              setNamaUser(response.datauser[0]["NamaPeg"]);
-              setUserName(response.datauser[0]["Username"]);
-              setLogin(true);
-            })
-            .catch(error => {
-              console.log('Error', error);
-            });
+  useFocusEffect(
+      useCallback(() => {
+        const backAction = () => {
+          const timeNow = Date.now();
+          if (lastBackPressed.current && timeNow - lastBackPressed.current < 2000) {
+            BackHandler.exitApp();
+            return true;
+          }
 
-
-        if (!!token === null) {
-          router.navigate("index");
-        }else{
-         router.navigate("homeScreen");
-        }
-        //setIsLoggedIn(!!token);
+          lastBackPressed.current = timeNow;
+          ToastAndroid.show('Tekan kembali sekali lagi untuk keluar', ToastAndroid.SHORT);
+          return true;
       };
 
-    useEffect(() => {
-      checkLogin();
-    }, []);
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        backAction,
+      );
+
+      return () => backHandler.remove();
+    }, [])
+  );
+
+  useEffect(() => {
+    checkLogin();
+  }, []);
 
   return (
     <View style={styles.container}>

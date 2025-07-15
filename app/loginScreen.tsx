@@ -62,11 +62,12 @@ const LoginScreen = () => {
           Alert.alert('Error', response["message"]);
           return;
         }else{
-          await saveToken(user);
+          await saveToken(response.datauser[0]["tokenLog"]);
           setNamaUser(response.datauser[0]["NamaPeg"]);
           setUserName(user);
           setLogin(true);
-          saveToken(user);
+          setUser("");
+          setPassword("");
           router.navigate("homeScreen");
         }
       })

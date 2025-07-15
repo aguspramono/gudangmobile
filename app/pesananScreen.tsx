@@ -280,8 +280,8 @@ export default function pesananScreen() {
             >
               {item.statusdiset == "pending" || item.diketahui == "pending"
                 ? "Menunggu"
-                : item.statusdiset == null || item.statusdiset == ""
-                ? "Disetujui"
+                : item.statusdiset == null || item.statusdiset == "" || item.statusdiset == "done"
+                ? "Selesai"
                 : item.statusdiset}
             </Text>
           </View>
@@ -626,7 +626,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
-    marginTop: 20,
+    marginTop: 50,
     paddingHorizontal: 20,
   },
 
