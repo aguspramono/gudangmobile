@@ -12,7 +12,7 @@ import { useShallow } from "zustand/react/shallow";
 import useLogin from "./../func/store/useUserLogin";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { deleteToken } from './../func/global/authStorage';
-import { getDatauserFun,checkLogin } from "./../func/logFunc"
+import { getDatauserFun,deleteTokenNotifUser } from "./../func/logFunc"
 
 function profileScreen() {
     const {
@@ -42,7 +42,10 @@ function profileScreen() {
     }
 
     const handleLogout = async () =>{
+        var bodyFormData = new FormData();
+        bodyFormData.append('username', userName);
         await deleteToken();
+        await deleteTokenNotifUser(bodyFormData);
         router.navigate("/");
     }
 

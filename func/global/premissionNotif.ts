@@ -5,10 +5,10 @@ import { Alert, Platform } from 'react-native';
 
 export const chekPremissionAndGetToken = async () => {
 
+
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
 
-    //console.log(existingStatus);
 
     if (existingStatus !== 'granted') {
         const { status } = await Notifications.requestPermissionsAsync();
@@ -42,22 +42,17 @@ export const chekPremissionAndGetToken = async () => {
             return null;
         }
     }else{
-        //console.log("dasdasdas");
-    //     const tokenData = await Notifications.getExpoPushTokenAsync();
-    //    Alert.alert("Token Data", JSON.stringify(tokenData));
 
-       
-        try {
-        const tokenData = await Notifications.getExpoPushTokenAsync();
-        Alert.alert("Token Didapat", tokenData.data);
-        } catch (error) {
-        console.log("Gagal Ambil Token", error.message);
+      if (Platform.OS === 'android') {
+            await Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+            });
         }
+        const tokenData = await Notifications.getExpoPushTokenAsync();
+        return tokenData.data;
+        
     }
-
-    
-    
-
-    
-
 };

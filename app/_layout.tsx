@@ -1,6 +1,26 @@
 import { Stack } from "expo-router";
+import { useEffect, useRef, useState } from 'react';
+import * as Notifications from 'expo-notifications';
+import { chekPremissionAndGetToken } from "./../func/global/premissionNotif";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 function Layout() {
+    const checkprem = async() =>{
+      await chekPremissionAndGetToken();
+    }
+
+  useEffect(() => {
+    checkprem();
+  }, []);
+  
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />

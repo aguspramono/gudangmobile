@@ -17,7 +17,6 @@ import useLogin from "./../func/store/useUserLogin";
 import { checkToken } from "./../func/logFunc";
 import { chekPremissionAndGetToken } from "./../func/global/premissionNotif";
 import { useFocusEffect } from '@react-navigation/native';
-
 function Splash() {
   const lastBackPressed = useRef(0);
   const {
@@ -64,8 +63,7 @@ function Splash() {
   };
 
   const checkprem = async() =>{
-    const a = await chekPremissionAndGetToken();
-    console.log(a);
+    await chekPremissionAndGetToken();
   }
 
 

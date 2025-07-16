@@ -38,6 +38,20 @@ export const getDatauserFun = async (data: FormData) => {
 };
 
 
+export const deleteTokenNotifUser = async (data: FormData) => {
+  try {
+    const response = await axios.post(`${baseUrl}/user/deletetokennotif`, data, { headers });
+    return response.data;
+  } catch (error) {
+    console.error("Error logging request:", error);
+    throw error;
+  }
+};
+
+
+
+
+
 export const checkLogin = async () => {
   const token = await getToken();
   console.log(token);

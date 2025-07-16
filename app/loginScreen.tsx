@@ -46,32 +46,31 @@ const LoginScreen = () => {
 
   const checkprem = async() =>{
     const response = await chekPremissionAndGetToken();
-    console.log(response);
     setToken(response);
   }
 
   const handleLogin = () => {
-    //checkprem();
-    console.log(token);
-    // if(token===null || token===""){
-    //   Alert.alert(
-    //     'Izin Diperlukan',
-    //     'Aplikasi membutuhkan izin notifikasi. Buka pengaturan untuk mengaktifkannya.',
-    //     [
-    //         {
-    //         text: 'Buka Pengaturan',
-    //         onPress: () => {
-    //             if (Platform.OS === 'ios') {
-    //             Linking.openURL('app-settings:');
-    //             } else {
-    //             Linking.openSettings();
-    //             }
-    //         },
-    //         }
-    //     ]
-    //     );
-    //   return;
-    // }
+    checkprem();
+    
+    if(token===null || token===""){
+      Alert.alert(
+        'Izin Diperlukan',
+        'Aplikasi membutuhkan izin notifikasi. Buka pengaturan untuk mengaktifkannya.',
+        [
+            {
+            text: 'Buka Pengaturan',
+            onPress: () => {
+                if (Platform.OS === 'ios') {
+                Linking.openURL('app-settings:');
+                } else {
+                Linking.openSettings();
+                }
+            },
+            }
+        ]
+        );
+      return;
+    }
     if(user===''){
       Alert.alert('Error', 'Username harus diisi.');
       return;
@@ -85,7 +84,7 @@ const LoginScreen = () => {
     var bodyFormData = new FormData();
     bodyFormData.append('username', user);
     bodyFormData.append('password', password);
-
+    bodyFormData.append('tokennotif', token);
     logRequest(bodyFormData)
       .then(async response => {
         if(response["status"]=="error"){
