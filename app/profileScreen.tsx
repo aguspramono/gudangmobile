@@ -52,7 +52,6 @@ function profileScreen() {
 
     return (
         <View style={styles.container}>
-
             <View style={{ alignItems: "center", justifyContent: "center", }}>
                 <View>
                      <Image
@@ -64,7 +63,6 @@ function profileScreen() {
                     ]}
                 />
                 <Text style={{ fontSize: 18,fontWeight: "bold",textAlign:'center',marginTop: 20,textTransform:'capitalize' }}>{namaUser}</Text>
-
                 </View>
                
                 <TouchableOpacity
@@ -85,10 +83,7 @@ function profileScreen() {
                                 styles.textMenuButton,
                                 { marginLeft: 5, color: "#3db61b" },
                             ]}
-                        >
-                            {" "}
-                            Ubah Profile
-                        </Text>
+                        >Ubah Profile</Text>
                     </View>
                 </TouchableOpacity>
 
@@ -142,10 +137,7 @@ function profileScreen() {
                                 styles.textMenuButton,
                                 { marginLeft: 5, color: "#b61b1b" },
                             ]}
-                        >
-                            {" "}
-                            Sign Out
-                        </Text>
+                        >Keluar</Text>
                     </View>
                 </TouchableOpacity>
             </View>

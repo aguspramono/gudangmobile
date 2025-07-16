@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,8 @@ import {
   StyleSheet,
   Alert,
   SafeAreaView,
-  StatusBar
+  StatusBar,
+  Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { logRequest } from "./../func/logFunc"
@@ -15,11 +16,14 @@ import { router, useFocusEffect } from "expo-router";
 import { useShallow } from "zustand/react/shallow";
 import useLogin from "./../func/store/useUserLogin";
 import { saveToken } from './../func/global/authStorage';
+import { chekPremissionAndGetToken } from "./../func/global/premissionNotif";
+import * as Linking from 'expo-linking';
 
 const LoginScreen = () => {
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [token, setToken] = useState(null);
 
     const {
     isLogin,
@@ -40,8 +44,34 @@ const LoginScreen = () => {
     }))
   );
 
-  const handleLogin = () => {
+  const checkprem = async() =>{
+    const response = await chekPremissionAndGetToken();
+    console.log(response);
+    setToken(response);
+  }
 
+  const handleLogin = () => {
+    //checkprem();
+    console.log(token);
+    // if(token===null || token===""){
+    //   Alert.alert(
+    //     'Izin Diperlukan',
+    //     'Aplikasi membutuhkan izin notifikasi. Buka pengaturan untuk mengaktifkannya.',
+    //     [
+    //         {
+    //         text: 'Buka Pengaturan',
+    //         onPress: () => {
+    //             if (Platform.OS === 'ios') {
+    //             Linking.openURL('app-settings:');
+    //             } else {
+    //             Linking.openSettings();
+    //             }
+    //         },
+    //         }
+    //     ]
+    //     );
+    //   return;
+    // }
     if(user===''){
       Alert.alert('Error', 'Username harus diisi.');
       return;
@@ -75,6 +105,10 @@ const LoginScreen = () => {
         Alert.alert('Error', error);
       });
   };
+
+    useEffect(() => {
+      checkprem();
+    }, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>

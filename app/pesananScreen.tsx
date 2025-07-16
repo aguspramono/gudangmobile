@@ -183,352 +183,327 @@ export default function pesananScreen() {
     );
   };
 
-  const handlePressOrderBarang = (itemId) => {
-    router.navigate({ pathname: "detailPesanBarang", params: { id: itemId } });
-    setSelectedOrderBarang(itemId);
-  };
+const handlePressOrderBarang = (itemId) => {
+  router.navigate({ pathname: "detailPesanBarang", params: { id: itemId } });
+  setSelectedOrderBarang(itemId);
+};
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchData(
-      ketpesanan,
-      0,
-      30,
-      optionfilter,
-      optionfiltertanggal,
-      "2025-01-01",
-      "2025-12-31",
-      optionbulan,
-      optionTahun,
-      status,
-      ""
-    );
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
+const onRefresh = useCallback(() => {
+  setRefreshing(true);
+  fetchData(
+    ketpesanan,
+    0,
+    30,
+    optionfilter,
+    optionfiltertanggal,
+    "2025-01-01",
+    "2025-12-31",
+    optionbulan,
+    optionTahun,
+    status,
+    ""
+  );
+  setTimeout(() => {
+    setRefreshing(false);
+  }, 2000);
+}, []);
 
-  useEffect(() => {
-    fetchData(
-      ketpesanan,
-      0,
-      30,
-      optionfilter,
-      optionfiltertanggal,
-      "2025-01-01",
-      "2025-12-31",
-      optionbulan,
-      optionTahun,
-      status,
-      ""
-    );
-  }, []);
+useEffect(() => {
+  fetchData(
+    ketpesanan,
+    0,
+    30,
+    optionfilter,
+    optionfiltertanggal,
+    "2025-01-01",
+    "2025-12-31",
+    optionbulan,
+    optionTahun,
+    status,
+    ""
+  );
+}, []);
 
-  const renderOrderBarang = ({ item }) => {
-    return (
+const renderOrderBarang = ({ item }) => {
+  return (
+    <TouchableOpacity
+      style={{
+        marginTop: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 15,
+        backgroundColor: "#fff",
+      }}
+      onPress={() => handlePressOrderBarang(item.inv)}
+    >
+      <View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ fontWeight: "bold", color: "#585858" }}>
+            {item.inv}
+          </Text>
+          <Text style={{ color: "#585858", fontSize: 12 }}>
+            {item.tanggal}
+          </Text>
+        </View>
+
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ marginTop: 5 }}>{item.detail}</Text>
+          <Text
+            style={{
+              color: "#585858",
+              fontSize: 12,
+              backgroundColor:
+                item.statusdiset == "pending"
+                  ? "#FFD666"
+                  : item.statusdiset == "onprocess"
+                  ? "#A0C4FF"
+                  : item.statusdiset == "rejected"
+                  ? "#FFB6B6"
+                  : "#9DE0AD",
+              paddingHorizontal: 10,
+              paddingVertical: 3,
+              marginTop: 5,
+              borderRadius: 10,
+            }}
+          >
+            {item.statusdiset == "pending" || item.diketahui == "pending"
+              ? "Menunggu"
+              : item.statusdiset == null || item.statusdiset == "" || item.statusdiset == "done"
+              ? "Selesai"
+              : item.statusdiset}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+return (
+  <View style={styles.container}>
+    <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+    <Text
+      style={{
+        color: "#585858",
+        fontWeight: "bold",
+        fontSize: 18,
+        marginBottom: 5,
+        marginTop: 15,
+      }}
+    >
+      Pesanan Barang
+    </Text>
+    <View style={styles.containerfilter}>
       <TouchableOpacity
         style={{
-          marginTop: 8,
-          paddingVertical: 10,
-          paddingHorizontal: 15,
-          borderRadius: 15,
-          backgroundColor: "#fff",
+          backgroundColor: "#0085c8",
+          paddingHorizontal: 5,
+          paddingVertical: 5,
+          borderRadius: 5,
+          marginRight: 8,
         }}
-        onPress={() => handlePressOrderBarang(item.inv)}
+        onPress={() => setModalVisible(true)}
       >
+        <MaterialCommunityIcons
+          name="filter-variant"
+          size={26}
+          color="#fff"
+        />
+      </TouchableOpacity>
+
+        <TouchableOpacity
+        style={{
+          backgroundColor: "#0085c8",
+          paddingHorizontal: 5,
+          paddingVertical: 5,
+          borderRadius: 5,
+          marginRight: 8,
+        }}
+        onPress={() => setModalVisible(true)}
+      >
+        <MaterialCommunityIcons
+          name="printer"
+          size={26}
+          color="#fff"
+        />
+      </TouchableOpacity>
+
+
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <TouchableOpacity style={[styles.button, status===''?styles.activeButton:null]}>
+          <Text style={[styles.buttonText, status===''?styles.activeText:null]} onPress={()=>{resetAndFetch("")}}>Semua</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, status==='done'?styles.activeButton:null]} onPress={()=>{resetAndFetch("done")}}>
+          <Text style={[styles.buttonText, status==='done'?styles.activeText:null]}>Disetujui</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, status==='onprocess'?styles.activeButton:null]} onPress={()=>{resetAndFetch("onprocess")}}>
+          <Text style={[styles.buttonText, status==='onprocess'?styles.activeText:null]}>Onprocess</Text>
+        </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, status==='pending'?styles.activeButton:null]} onPress={()=>{resetAndFetch("pending")}}>
+          <Text style={[styles.buttonText, status==='pending'?styles.activeText:null]}>Menunggu</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
+
+    <View>
+      <FlatList
+        data={pesananbarang}
+        renderItem={renderOrderBarang}
+        keyExtractor={(item) => item.id}
+        onEndReached={() => {
+          nextPage();
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={loading && <ActivityIndicator size="large" />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#9Bd35A", "#689F38"]}
+          />
+        }
+        style={{ marginBottom: 20 }}
+      />
+    </View>
+
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalVisible}
+      onRequestClose={() => setModalVisible(false)}
+    >
+      <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+        <View style={styles.modalOverlay} />
+      </TouchableWithoutFeedback>
+
+      <View style={styles.bottomModal}>
         <View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontWeight: "bold", color: "#585858" }}>
-              {item.inv}
-            </Text>
-            <Text style={{ color: "#585858", fontSize: 12 }}>
-              {item.tanggal}
-            </Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={optionfiltertanggal}
+              style={styles.picker}
+              onValueChange={(itemValue) => setoptionfiltertanggal(itemValue)}
+            >
+              <Picker.Item label="Semua" value="Semua" />
+              <Picker.Item label="Tanggal" value="Tanggal" />
+              <Picker.Item label="Bulan" value="Bulan" />
+              <Picker.Item label="Tahun" value="Tahun" />
+            </Picker>
           </View>
 
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ marginTop: 5 }}>{item.detail}</Text>
-            <Text
+          {/* by tgl */}
+          {optionfiltertanggal == "Tanggal" || optionfiltertanggal == "" ? (
+            <View
               style={{
-                color: "#585858",
-                fontSize: 12,
-                backgroundColor:
-                  item.statusdiset == "pending"
-                    ? "#FFD666"
-                    : item.statusdiset == "onprocess"
-                    ? "#A0C4FF"
-                    : item.statusdiset == "rejected"
-                    ? "#FFB6B6"
-                    : "#9DE0AD",
-                paddingHorizontal: 10,
-                paddingVertical: 3,
-                marginTop: 5,
-                borderRadius: 10,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: 10,
               }}
             >
-              {item.statusdiset == "pending" || item.diketahui == "pending"
-                ? "Menunggu"
-                : item.statusdiset == null || item.statusdiset == "" || item.statusdiset == "done"
-                ? "Selesai"
-                : item.statusdiset}
-            </Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+              <View style={{ flex: 1, marginRight: 5 }}>
+                <Text style={{ fontSize: 17, marginBottom: 5 }}>
+                  Tanggal Dari
+                </Text>
+                <TouchableOpacity
+                  style={[
+                    styles.pickerContainer,
+                    {
+                      height: 50,
+                      display: "flex",
+                      justifyContent: "center",
+                      paddingHorizontal: 10,
+                    },
+                  ]}
+                  onPress={showDatePickerDari}
+                >
+                  <Text style={{ fontSize: 17 }}>
+                    {selectedDate
+                      ? selectedDate.toLocaleDateString()
+                      : "Pilih tanggal"}
+                  </Text>
+                </TouchableOpacity>
+                <DateTimePickerModal
+                  isVisible={isDatePickerVisible}
+                  mode="date"
+                  onConfirm={handleConfirm}
+                  onCancel={hideDatePickerDari}
+                />
+              </View>
 
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <Text
-        style={{
-          color: "#585858",
-          fontWeight: "bold",
-          fontSize: 18,
-          marginBottom: 5,
-          marginTop: 15,
-        }}
-      >
-        Pesanan Barang
-      </Text>
-      <View style={styles.containerfilter}>
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#0085c8",
-            paddingHorizontal: 5,
-            paddingVertical: 5,
-            borderRadius: 5,
-            marginRight: 8,
-          }}
-          onPress={() => setModalVisible(true)}
-        >
-          <MaterialCommunityIcons
-            name="filter-variant"
-            size={26}
-            color="#fff"
-          />
-        </TouchableOpacity>
-
-         <TouchableOpacity
-          style={{
-            backgroundColor: "#0085c8",
-            paddingHorizontal: 5,
-            paddingVertical: 5,
-            borderRadius: 5,
-            marginRight: 8,
-          }}
-          onPress={() => setModalVisible(true)}
-        >
-          <MaterialCommunityIcons
-            name="printer"
-            size={26}
-            color="#fff"
-          />
-        </TouchableOpacity>
-
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <TouchableOpacity style={[styles.button, status===''?styles.activeButton:null]}>
-            <Text style={[styles.buttonText, status===''?styles.activeText:null]} onPress={()=>{resetAndFetch("")}}>Semua</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, status==='done'?styles.activeButton:null]} onPress={()=>{resetAndFetch("done")}}>
-            <Text style={[styles.buttonText, status==='done'?styles.activeText:null]}>Disetujui</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, status==='onprocess'?styles.activeButton:null]} onPress={()=>{resetAndFetch("onprocess")}}>
-            <Text style={[styles.buttonText, status==='onprocess'?styles.activeText:null]}>Onprocess</Text>
-          </TouchableOpacity>
-           <TouchableOpacity style={[styles.button, status==='pending'?styles.activeButton:null]} onPress={()=>{resetAndFetch("pending")}}>
-            <Text style={[styles.buttonText, status==='pending'?styles.activeText:null]}>Menunggu</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
-
-      <View>
-        <FlatList
-          data={pesananbarang}
-          renderItem={renderOrderBarang}
-          keyExtractor={(item) => item.id}
-          onEndReached={() => {
-            nextPage();
-          }}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={loading && <ActivityIndicator size="large" />}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["#9Bd35A", "#689F38"]}
-            />
-          }
-          style={{ marginBottom: 20 }}
-        />
-      </View>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalOverlay} />
-        </TouchableWithoutFeedback>
-
-        <View style={styles.bottomModal}>
-          <View>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={optionfiltertanggal}
-                style={styles.picker}
-                onValueChange={(itemValue) => setoptionfiltertanggal(itemValue)}
-              >
-                <Picker.Item label="Semua" value="Semua" />
-                <Picker.Item label="Tanggal" value="Tanggal" />
-                <Picker.Item label="Bulan" value="Bulan" />
-                <Picker.Item label="Tahun" value="Tahun" />
-              </Picker>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 17, marginBottom: 5 }}>
+                  Tanggal Sampai
+                </Text>
+                <TouchableOpacity
+                  style={[
+                    styles.pickerContainer,
+                    {
+                      height: 50,
+                      display: "flex",
+                      justifyContent: "center",
+                      paddingHorizontal: 10,
+                    },
+                  ]}
+                  onPress={showDatePickerSampai}
+                >
+                  <Text style={{ fontSize: 17 }}>
+                    {selectedDateSampai
+                      ? selectedDateSampai.toLocaleDateString()
+                      : "Pilih tanggal"}
+                  </Text>
+                </TouchableOpacity>
+                <DateTimePickerModal
+                  isVisible={isDatePickerVisibleSampai}
+                  mode="date"
+                  onConfirm={handleConfirmSampai}
+                  onCancel={hideDatePickerSampai}
+                />
+              </View>
             </View>
-
-            {/* by tgl */}
-            {optionfiltertanggal == "Tanggal" || optionfiltertanggal == "" ? (
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginTop: 10,
-                }}
-              >
-                <View style={{ flex: 1, marginRight: 5 }}>
-                  <Text style={{ fontSize: 17, marginBottom: 5 }}>
-                    Tanggal Dari
-                  </Text>
-                  <TouchableOpacity
-                    style={[
-                      styles.pickerContainer,
-                      {
-                        height: 50,
-                        display: "flex",
-                        justifyContent: "center",
-                        paddingHorizontal: 10,
-                      },
-                    ]}
-                    onPress={showDatePickerDari}
+          ) : optionfiltertanggal == "Bulan" ? (
+            <View>
+              <View style={{ marginTop: 10 }}>
+                <Text style={{ fontSize: 17, marginBottom: 5 }}>Bulan</Text>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={optionbulan}
+                    style={styles.picker}
+                    onValueChange={(itemValue) => setOptionBulan(itemValue)}
                   >
-                    <Text style={{ fontSize: 17 }}>
-                      {selectedDate
-                        ? selectedDate.toLocaleDateString()
-                        : "Pilih tanggal"}
-                    </Text>
-                  </TouchableOpacity>
-                  <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="date"
-                    onConfirm={handleConfirm}
-                    onCancel={hideDatePickerDari}
-                  />
-                </View>
-
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 17, marginBottom: 5 }}>
-                    Tanggal Sampai
-                  </Text>
-                  <TouchableOpacity
-                    style={[
-                      styles.pickerContainer,
-                      {
-                        height: 50,
-                        display: "flex",
-                        justifyContent: "center",
-                        paddingHorizontal: 10,
-                      },
-                    ]}
-                    onPress={showDatePickerSampai}
-                  >
-                    <Text style={{ fontSize: 17 }}>
-                      {selectedDateSampai
-                        ? selectedDateSampai.toLocaleDateString()
-                        : "Pilih tanggal"}
-                    </Text>
-                  </TouchableOpacity>
-                  <DateTimePickerModal
-                    isVisible={isDatePickerVisibleSampai}
-                    mode="date"
-                    onConfirm={handleConfirmSampai}
-                    onCancel={hideDatePickerSampai}
-                  />
+                    <Picker.Item label="01" value="01" />
+                    <Picker.Item label="02" value="02" />
+                    <Picker.Item label="03" value="03" />
+                    <Picker.Item label="04" value="04" />
+                    <Picker.Item label="05" value="05" />
+                    <Picker.Item label="06" value="06" />
+                    <Picker.Item label="07" value="07" />
+                    <Picker.Item label="08" value="08" />
+                    <Picker.Item label="09" value="09" />
+                    <Picker.Item label="10" value="10" />
+                    <Picker.Item label="11" value="11" />
+                    <Picker.Item label="12" value="12" />
+                  </Picker>
                 </View>
               </View>
-            ) : optionfiltertanggal == "Bulan" ? (
-              <View>
-                <View style={{ marginTop: 10 }}>
-                  <Text style={{ fontSize: 17, marginBottom: 5 }}>Bulan</Text>
-                  <View style={styles.pickerContainer}>
-                    <Picker
-                      selectedValue={optionbulan}
-                      style={styles.picker}
-                      onValueChange={(itemValue) => setOptionBulan(itemValue)}
-                    >
-                      <Picker.Item label="01" value="01" />
-                      <Picker.Item label="02" value="02" />
-                      <Picker.Item label="03" value="03" />
-                      <Picker.Item label="04" value="04" />
-                      <Picker.Item label="05" value="05" />
-                      <Picker.Item label="06" value="06" />
-                      <Picker.Item label="07" value="07" />
-                      <Picker.Item label="08" value="08" />
-                      <Picker.Item label="09" value="09" />
-                      <Picker.Item label="10" value="10" />
-                      <Picker.Item label="11" value="11" />
-                      <Picker.Item label="12" value="12" />
-                    </Picker>
-                  </View>
-                </View>
 
-                <View style={{ marginTop: 10 }}>
-                  <Text style={{ fontSize: 17, marginBottom: 5 }}>Tahun</Text>
-                  <View style={styles.pickerContainer}>
-                    <Picker
-                      selectedValue={optionTahun}
-                      style={styles.picker}
-                      onValueChange={(itemValue) => setOptionTahun(itemValue)}
-                    >
-                      {Array.from({ length: 20 }).map((_, i) => {
-                        const year = new Date().getFullYear() - i;
-                        return (
-                          <Picker.Item
-                            key={year}
-                            label={year.toString()}
-                            value={year.toString()}
-                          />
-                        );
-                      })}
-                    </Picker>
-                  </View>
-                </View>
-              </View>
-            ) : optionfiltertanggal == "Tahun" ? (
               <View style={{ marginTop: 10 }}>
                 <Text style={{ fontSize: 17, marginBottom: 5 }}>Tahun</Text>
                 <View style={styles.pickerContainer}>
                   <Picker
-                    selectedValue={optionfiltertanggal}
+                    selectedValue={optionTahun}
                     style={styles.picker}
-                    onValueChange={(itemValue) =>
-                      setOptionTahun(itemValue)
-                    }
+                    onValueChange={(itemValue) => setOptionTahun(itemValue)}
                   >
                     {Array.from({ length: 20 }).map((_, i) => {
                       const year = new Date().getFullYear() - i;
@@ -543,79 +518,104 @@ export default function pesananScreen() {
                   </Picker>
                 </View>
               </View>
-            ) : (
-              ""
-            )}
-
+            </View>
+          ) : optionfiltertanggal == "Tahun" ? (
             <View style={{ marginTop: 10 }}>
-              <Text style={{ fontSize: 17, marginBottom: 5 }}>Berdasarkan</Text>
+              <Text style={{ fontSize: 17, marginBottom: 5 }}>Tahun</Text>
               <View style={styles.pickerContainer}>
                 <Picker
-                  selectedValue={optionfilter}
+                  selectedValue={optionfiltertanggal}
                   style={styles.picker}
-                  onValueChange={(itemValue) => setoptionfilter(itemValue)}
+                  onValueChange={(itemValue) =>
+                    setOptionTahun(itemValue)
+                  }
                 >
-                  <Picker.Item label="Nomor Pesanan" value="Nomor Pesanan" />
-                  <Picker.Item label="Departemen" value="Departemen" />
+                  {Array.from({ length: 20 }).map((_, i) => {
+                    const year = new Date().getFullYear() - i;
+                    return (
+                      <Picker.Item
+                        key={year}
+                        label={year.toString()}
+                        value={year.toString()}
+                      />
+                    );
+                  })}
                 </Picker>
               </View>
+            </View>
+          ) : (
+            ""
+          )}
 
-              <View style={[styles.pickerContainer, { marginTop: 5 }]}>
-                <TextInput
-                  style={{ fontSize: 17, paddingHorizontal: 10 }}
-                  placeholder={"Cari by " + optionfilter}
-                  value={ketpesanan}
-                  onChangeText={setKetPesanan}
-                />
-              </View>
+          <View style={{ marginTop: 10 }}>
+            <Text style={{ fontSize: 17, marginBottom: 5 }}>Berdasarkan</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={optionfilter}
+                style={styles.picker}
+                onValueChange={(itemValue) => setoptionfilter(itemValue)}
+              >
+                <Picker.Item label="Nomor Pesanan" value="Nomor Pesanan" />
+                <Picker.Item label="Departemen" value="Departemen" />
+              </Picker>
             </View>
 
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
-            >
-              <TouchableOpacity
-                onPress={() => {
-                  resetAndFetch("")
-                }}
-                style={{
-                  flex: 1,
-                  marginRight: 5,
-                  height: 50,
-                  backgroundColor: "#0085c8",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  paddingHorizontal: 20,
-                  borderRadius: 10,
-                  marginTop: 15,
-                }}
-              >
-                <Text style={[styles.buttonTextrt, { fontSize: 17 }]}>
-                  Proses
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                style={{
-                  flex: 1,
-                  height: 50,
-                  backgroundColor: "#c80035",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  paddingHorizontal: 20,
-                  borderRadius: 10,
-                  marginTop: 15,
-                }}
-              >
-                <Text style={[styles.buttonTextrt, { fontSize: 17 }]}>
-                  Tutup
-                </Text>
-              </TouchableOpacity>
+            <View style={[styles.pickerContainer, { marginTop: 5 }]}>
+              <TextInput
+                style={{ fontSize: 17, paddingHorizontal: 10 }}
+                placeholder={"Cari by " + optionfilter}
+                value={ketpesanan}
+                onChangeText={setKetPesanan}
+              />
             </View>
           </View>
+
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                resetAndFetch("")
+              }}
+              style={{
+                flex: 1,
+                marginRight: 5,
+                height: 50,
+                backgroundColor: "#0085c8",
+                justifyContent: "center",
+                alignItems: "center",
+                paddingHorizontal: 20,
+                borderRadius: 10,
+                marginTop: 15,
+              }}
+            >
+              <Text style={[styles.buttonTextrt, { fontSize: 17 }]}>
+                Proses
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={{
+                flex: 1,
+                height: 50,
+                backgroundColor: "#c80035",
+                justifyContent: "center",
+                alignItems: "center",
+                paddingHorizontal: 20,
+                borderRadius: 10,
+                marginTop: 15,
+              }}
+            >
+              <Text style={[styles.buttonTextrt, { fontSize: 17 }]}>
+                Tutup
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </Modal>
-    </View>
-  );
+      </View>
+    </Modal>
+  </View>
+);
 }
 
 const styles = StyleSheet.create({

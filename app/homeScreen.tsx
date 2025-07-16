@@ -7,7 +7,6 @@ import { router, useFocusEffect } from "expo-router";
 import { useShallow } from "zustand/react/shallow";
 import useLogin from "./../func/store/useUserLogin";
 
-
 export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedOrderBarang, setSelectedOrderBarang] = useState(null);
@@ -16,7 +15,7 @@ export default function HomeScreen() {
 
   const [pesananbarang, setPesananBarang] = useState<any[]>([]);
 
-    const {
+  const {
     isLogin,
     setLogin,
     userName,
@@ -100,7 +99,6 @@ export default function HomeScreen() {
   };
 
   const renderOrderBarang = ({ item }) => {
-
     return (
       <TouchableOpacity style={{ marginTop: 8, paddingVertical: 10, paddingHorizontal: 15, borderRadius: 15, backgroundColor: '#fff' }} onPress={() => handlePressOrderBarang(item.inv)}>
         <View>
@@ -135,12 +133,8 @@ export default function HomeScreen() {
   }, []);
 
   return (
-
-
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-
-
       <View style={styles.headerProfile}>
         <Text style={{ color: '#585858', fontWeight: 'bold', fontSize: 16,textTransform:'capitalize' }}>Selamat Pagi, {namaUser}!</Text>
         <TouchableOpacity style={styles.avatarContainer} onPress={handleProfile}>
@@ -176,9 +170,7 @@ export default function HomeScreen() {
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
           /></ScrollView>
-
       </View>
-
     </View>
   );
 }

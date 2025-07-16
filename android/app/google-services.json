@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "407605841200",
+    "project_id": "gudangappssa",
+    "storage_bucket": "gudangappssa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:407605841200:android:90edd2428b8b9d036d8cf5",
+        "android_client_info": {
+          "package_name": "com.aguspramono.GudangApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkp8nkNmEjKVOBcjxqTYIP9vodxPRZxdc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

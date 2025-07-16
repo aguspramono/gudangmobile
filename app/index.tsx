@@ -14,7 +14,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getToken } from './../func/global/authStorage';
 import { useShallow } from "zustand/react/shallow";
 import useLogin from "./../func/store/useUserLogin";
-import { checkToken } from "./../func/logFunc"
+import { checkToken } from "./../func/logFunc";
+import { chekPremissionAndGetToken } from "./../func/global/premissionNotif";
 import { useFocusEffect } from '@react-navigation/native';
 
 function Splash() {
@@ -34,7 +35,6 @@ function Splash() {
       setUserName: state.setUserName,
       namaUser: state.namaUser,
       setNamaUser: state.setNamaUser
-
     }))
   );
 
@@ -63,6 +63,11 @@ function Splash() {
     }
   };
 
+  const checkprem = async() =>{
+    const a = await chekPremissionAndGetToken();
+    console.log(a);
+  }
+
 
   useFocusEffect(
       useCallback(() => {
@@ -88,7 +93,9 @@ function Splash() {
   );
 
   useEffect(() => {
+    checkprem();
     checkLogin();
+    
   }, []);
 
   return (
@@ -103,7 +110,7 @@ function Splash() {
         </Text>
 
         <Pressable
-          onPress={() => router.navigate("/loginScreen")}
+          onPress={() => {checkprem(),router.navigate("/loginScreen")}}
           style={{
             backgroundColor: "#3db61b",
             paddingHorizontal: 25,

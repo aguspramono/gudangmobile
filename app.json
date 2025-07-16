@@ -2,12 +2,21 @@
   "expo": {
     "scheme": "acme",
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-notifications"
     ],
     "name": "GudangApp",
     "slug": "GudangApp",
     "android": {
-      "package": "com.aguspramono.GudangApp"
+      "package": "com.aguspramono.GudangApp",
+      "useNextNotificationsApi": true,
+      "googleServicesFile": "./android/app/google-services.json"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cae3455b-4721-47d7-b743-c3268a6adc70"
+      }
     }
   }
 }
