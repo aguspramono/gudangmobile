@@ -1,20 +1,14 @@
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Image,
-} from "react-native";
-import { StatusBar } from "expo-status-bar";
-import { router } from "expo-router";
 import React, { useEffect, useState } from 'react';
-import { useShallow } from "zustand/react/shallow";
-import useLogin from "./../func/store/useUserLogin";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { StatusBar } from "expo-status-bar";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { deleteToken } from './../func/global/authStorage';
 import { getDatauserFun,deleteTokenNotifUser } from "./../func/logFunc"
+import { useShallow } from "zustand/react/shallow";
+import useLogin from "./../func/store/useUserLogin";
+import { router } from "expo-router";
 
-function profileScreen() {
+const ProfileScreen = () => {
     const {
         isLogin,
         setLogin,
@@ -49,136 +43,150 @@ function profileScreen() {
         router.navigate("/");
     }
 
+    const MenuItem = ({ title, icon, isLogout }) => (
+        <TouchableOpacity style={styles.menuItem} onPress={()=> isLogout?handleLogout():console.log}>
+            <Ionicons name={icon} size={20} color={isLogout ? 'tomato' : '#555'} />
+            <Text style={[styles.menuText, isLogout && { color: 'tomato' }]}>{title}</Text>
+            <Ionicons name="chevron-forward" size={20} color="#ccc" style={{ marginLeft: 'auto' }} />
+        </TouchableOpacity>
+        );
+
     useEffect(() => {
         getDataUser();
     }, []);
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+        <StatusBar style="light" />
+      <View style={styles.header}>
+      </View>
 
-    return (
-        <View style={styles.container}>
-            <View style={{ alignItems: "center", justifyContent: "center", }}>
-                <View>
-                     <Image
-                    source={{ uri: 'https://i.pravatar.cc/100' }}
-                    style={[
-                        styles.circleImageLayout,
-                        styles.centerItem,
-                        { marginTop: 70 },
-                    ]}
-                />
-                <Text style={{ fontSize: 18,fontWeight: "bold",textAlign:'center',marginTop: 20,textTransform:'capitalize' }}>{namaUser}</Text>
-                </View>
-               
-                <TouchableOpacity
-                    style={[
-                        styles.menuButton,
-                        {
-                            marginTop: 50,
-                            width: "100%",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            borderColor: "#3db61b",
-                        },
-                    ]}
-                >
-                    <View>
-                        <Text
-                            style={[
-                                styles.textMenuButton,
-                                { marginLeft: 5, color: "#3db61b" },
-                            ]}
-                        >Ubah Profile</Text>
-                    </View>
-                </TouchableOpacity>
+      <View style={styles.profileCard}>
+        <Image
+          source={{ uri: 'https://i.pravatar.cc/100' }}
+          style={styles.profileImage}
+        />
+        <Text style={styles.name}>{namaUser}</Text>
+        <Text style={styles.email}>{userName}</Text>
 
-                <TouchableOpacity
-                    style={[
-                        styles.menuButton,
-                        {
-                            marginTop: 10,
-                            width: "100%",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            borderColor: "#3db61b",
-                        },
-                    ]}
-                >
-                    <View>
-                        <Text
-                            style={[
-                                styles.textMenuButton,
-                                { marginLeft: 5, color: "#3db61b" },
-                            ]}
-                        >
-                            {" "}
-                            Ubah Password
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[
-                        styles.menuButton,
-                        {
-                            marginBottom: 100,
-                            marginTop: 10,
-                            width: "100%",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            borderColor: "#b61b1b",
-                        },
-                    ]}
-                    onPress={()=>handleLogout()}
-                >
-                    <View>
-                        <Text style={{}}>
-                            <MaterialCommunityIcons size={18} name="logout" color="#b61b1b" />
-                        </Text>
-                    </View>
-                    <View>
-                        <Text
-                            style={[
-                                styles.textMenuButton,
-                                { marginLeft: 5, color: "#b61b1b" },
-                            ]}
-                        >Keluar</Text>
-                    </View>
-                </TouchableOpacity>
-            </View>
-            <StatusBar style="light" />
+        <View style={styles.infoRow}>
+          <View style={styles.infoBox}>
+            <Text style={styles.infoLabel}>"Setiap hari adalah kesempatan baru untuk menjadi versi terbaik dari diri kita"</Text>
+          </View>
         </View>
-    );
-}
+      </View>
 
-export default profileScreen;
+      <View style={styles.menuList}>
+        <MenuItem title="Ubah Profile" icon="create-outline" isLogout={false}/>
+        <MenuItem title="Ubah Password" icon="create-outline" isLogout={false}/>
+        <MenuItem title="Logout" icon="log-out-outline" isLogout />
+      </View>
+
+      <View style={{marginTop:30}}><Text style={{textAlign:'center'}}>PT. Swastisiddhi Amagra</Text><Text style={{textAlign:'center'}}>V 1.0</Text></View>
+
+    </ScrollView>
+    
+    
+  );
+};
+
+
 
 const styles = StyleSheet.create({
-container: {
-    flex: 1,
-    backgroundColor: "transparent",
-    marginTop: 20,
+  container: {
+    flex:1,
+    backgroundColor: '#F6F9F7',
+    paddingBottom: 20,
+  },
+  header: {
+    backgroundColor: '#0085c8',
+    paddingTop: 0,
+    paddingBottom: 20,
     paddingHorizontal: 20,
-},
-image: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-},
-circleImageLayout: {
-    width: 120,
-    height: 120,
-    borderRadius: 200 / 2,
-},
-centerItem: {
-    alignItems: "center",
-},
-menuButton: {
-    flexDirection: "row",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    height:200
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  profileCard: {
+    alignItems: 'center',
+    marginTop: -80,
+    backgroundColor: 'white',
+    marginHorizontal: 20,
+    padding: 20,
     borderRadius: 20,
-    borderWidth: 0.5,
-},
-textMenuButton: {
-    justifyContent: "center",
-},
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+  },
+  profileImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    marginBottom: 10,
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textTransform:'capitalize',
+  },
+  email: {
+    color: '#888',
+    marginBottom: 10,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
+  infoBox: {
+    flex: 1,
+    backgroundColor: '#E5F3ED',
+    padding: 10,
+    marginHorizontal: 5,
+    borderRadius: 10,
+  },
+  yellowBox: {
+    backgroundColor: '#FFD966',
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: '#555',
+    textAlign:'center'
+  },
+  infoValue: {
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  menuList: {
+    marginTop: 20,
+    marginHorizontal: 20,
+  },
+  menuItem: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  menuText: {
+    fontSize: 16,
+    marginLeft: 10,
+    color: '#333',
+  },
 });
+
+export default ProfileScreen;

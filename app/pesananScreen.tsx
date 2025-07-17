@@ -282,7 +282,7 @@ const renderOrderBarang = ({ item }) => {
               ? "Menunggu"
               : item.statusdiset == null || item.statusdiset == "" || item.statusdiset == "done"
               ? "Selesai"
-              : item.statusdiset}
+              : item.statusdiset == "rejected" ? "Ditolak":''}
           </Text>
         </View>
       </View>
@@ -345,10 +345,10 @@ return (
           <Text style={[styles.buttonText, status===''?styles.activeText:null]} onPress={()=>{resetAndFetch("")}}>Semua</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, status==='done'?styles.activeButton:null]} onPress={()=>{resetAndFetch("done")}}>
-          <Text style={[styles.buttonText, status==='done'?styles.activeText:null]}>Disetujui</Text>
+          <Text style={[styles.buttonText, status==='done'?styles.activeText:null]}>Selesai</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, status==='onprocess'?styles.activeButton:null]} onPress={()=>{resetAndFetch("onprocess")}}>
-          <Text style={[styles.buttonText, status==='onprocess'?styles.activeText:null]}>Onprocess</Text>
+          <Text style={[styles.buttonText, status==='onprocess'?styles.activeText:null]}>Proses</Text>
         </TouchableOpacity>
           <TouchableOpacity style={[styles.button, status==='pending'?styles.activeButton:null]} onPress={()=>{resetAndFetch("pending")}}>
           <Text style={[styles.buttonText, status==='pending'?styles.activeText:null]}>Menunggu</Text>
@@ -481,6 +481,7 @@ return (
                     style={styles.picker}
                     onValueChange={(itemValue) => setOptionBulan(itemValue)}
                   >
+                    <Picker.Item label="Pilih Bulan" value="Pilih Bulan" />
                     <Picker.Item label="01" value="01" />
                     <Picker.Item label="02" value="02" />
                     <Picker.Item label="03" value="03" />
@@ -503,8 +504,9 @@ return (
                   <Picker
                     selectedValue={optionTahun}
                     style={styles.picker}
-                    onValueChange={(itemValue) => setOptionTahun(itemValue)}
+                    onValueChange={(itemValue) =>{console.log(itemValue), setOptionTahun(itemValue)}}
                   >
+                    <Picker.Item label="Pilih Tahun" value="Pilih Tahun" />
                     {Array.from({ length: 20 }).map((_, i) => {
                       const year = new Date().getFullYear() - i;
                       return (
@@ -524,12 +526,13 @@ return (
               <Text style={{ fontSize: 17, marginBottom: 5 }}>Tahun</Text>
               <View style={styles.pickerContainer}>
                 <Picker
-                  selectedValue={optionfiltertanggal}
+                  selectedValue={optionTahun}
                   style={styles.picker}
                   onValueChange={(itemValue) =>
-                    setOptionTahun(itemValue)
-                  }
+                    {setOptionTahun(itemValue)}}
+                  
                 >
+                  <Picker.Item label="Pilih Tahun" value="Pilih Tahun" />
                   {Array.from({ length: 20 }).map((_, i) => {
                     const year = new Date().getFullYear() - i;
                     return (

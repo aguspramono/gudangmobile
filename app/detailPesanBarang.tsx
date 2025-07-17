@@ -90,7 +90,12 @@ function detailPesanBarang() {
                     alokasi: item.Alokasi,
                 })
             ));
-            setDepartemen(dataDetail[0].Departemen);
+            if(dataDetail.length>0){
+                setDepartemen(dataDetail[0].Departemen);
+            }else{
+                setDepartemen(null);
+            }
+            
             setPesananBarangDetail(pesananbarangdetailarr);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -99,7 +104,7 @@ function detailPesanBarang() {
 
     const handlePressOrderBarang = (status) => {
         if (status === "terima") {
-            setTitle("Peringantan!");
+            setTitle("Peringatan!");
             setMessage("Yakin ingin menerima pesanan barang ini?");
             setOption("confirm");
             setTextConfirmAcc("Terima");
@@ -107,7 +112,7 @@ function detailPesanBarang() {
             setShowAlert(true);
             setStatuspass("terima");
         } else if (status === "tolak") {
-            setTitle("Peringantan!");
+            setTitle("Peringatan!");
             setMessage("Yakin ingin menolak pesanan barang ini?");
             setOption("confirm");
             setTextConfirmAcc("Tolak");
@@ -226,7 +231,7 @@ function detailPesanBarang() {
                     <View key={i} style={{ padding: 10, backgroundColor: '#A0C4FF20', borderRadius: 10 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: item["statusdiset"] == "pending" ? '#FFD666' : item["statusdiset"] == "onprocess" ? '#A0C4FF' : item["statusdiset"] == "rejected" ? '#FFB6B6' : '#9DE0AD', paddingHorizontal: 10, paddingVertical: 3, marginBottom: 10 }}>
                             <Text style={{ color: "#585858", fontSize: 12, textTransform: 'capitalize' }}>
-                                {(item["statusdiset"] == "pending" || item.diketahui == "pending" ? "Menunggu" : (item["statusdiset"] == null || item["statusdiset"] == "" || item["statusdiset"] == "done" ? "Selesai" : item["statusdiset"]))}
+                                {(item["statusdiset"] == "pending" || item.diketahui == "pending" ? "Menunggu" : (item["statusdiset"] == null || item["statusdiset"] == "" || item["statusdiset"] == "done" ? "Selesai" :item["statusdiset"] == "rejected"?"Ditolak":''))}
                             </Text>
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -322,6 +327,18 @@ function detailPesanBarang() {
                         renderItem={renderDetailPesananBarang}
                         keyExtractor={(item) => item.id}
                         scrollEnabled={false}
+                        ListEmptyComponent={
+                            <View style={{ alignItems: 'center', marginTop: 50 }}>
+                            <Image
+                                source={require('./../assets/images/empty.png')}
+                                style={{ width: 150, height: 150, marginBottom: 15 }}
+                                resizeMode="contain"
+                            />
+                            <Text style={{ textAlign: 'center', color: '#888', fontSize: 16 }}>
+                                tidak ada data
+                            </Text>
+                            </View>
+                        }
                     /></ScrollView>
             </View>
 
@@ -376,7 +393,6 @@ function detailPesanBarang() {
                 textconfirmacc=""
                 textconfirmdec=""
             />
-            <StatusBar style="light" />
         </View>
     );
 }

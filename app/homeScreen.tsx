@@ -62,6 +62,8 @@ export default function HomeScreen() {
     setSelectedCategory(itemId);
     if(itemId=="0"){
       router.navigate({ pathname: "pesananScreen" });
+    }else if(itemId=="1"){
+      router.navigate({ pathname: "orderScreen" });
     }
     Animated.sequence([
       Animated.timing(scaleAnim, { toValue: 1.1, duration: 100, useNativeDriver: true }),
@@ -98,27 +100,70 @@ export default function HomeScreen() {
     );
   };
 
-  const renderOrderBarang = ({ item }) => {
-    return (
-      <TouchableOpacity style={{ marginTop: 8, paddingVertical: 10, paddingHorizontal: 15, borderRadius: 15, backgroundColor: '#fff' }} onPress={() => handlePressOrderBarang(item.inv)}>
-        <View>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={{ fontWeight: 'bold', color: "#585858" }}>{item.inv}</Text>
-            <Text style={{ color: "#585858", fontSize: 12 }}>{item.tanggal}</Text>
-          </View>
 
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={{ marginTop: 5 }}>
-              {item.detail}
-            </Text>
-            <Text style={{ color: "#585858", fontSize: 12, backgroundColor: '#FFD666', paddingHorizontal: 10, paddingVertical: 3, marginTop: 5, borderRadius: 10 }}>
-              {(item.statusdiset=="pending" || item.diketahui=="pending" ? "Menunggu":item.statusdiset)}
-            </Text>
-          </View>
+  const renderOrderBarang = ({ item }) => {
+  if (!item || !item.inv || !item.tanggal || !item.detail) {
+    return null;
+  }
+
+  const statusLabel = 
+    item.statusdiset === "pending" || item.diketahui === "pending"
+      ? "Menunggu"
+      : item.statusdiset;
+
+  return (
+    <TouchableOpacity
+      style={{
+        marginTop: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 15,
+        backgroundColor: '#fff',
+      }}
+      onPress={() => handlePressOrderBarang(item.inv)}
+    >
+      <View>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ fontWeight: 'bold', color: '#585858' }}>
+            {item.inv}
+          </Text>
+          <Text style={{ color: '#585858', fontSize: 12 }}>
+            {item.tanggal}
+          </Text>
         </View>
-      </TouchableOpacity>
-    );
-  };
+
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ marginTop: 5 }}>{item.detail}</Text>
+          <Text
+            style={{
+              color: '#585858',
+              fontSize: 12,
+              backgroundColor: '#FFD666',
+              paddingHorizontal: 10,
+              paddingVertical: 3,
+              marginTop: 5,
+              borderRadius: 10,
+            }}
+          >
+            {statusLabel}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -128,6 +173,13 @@ export default function HomeScreen() {
     }, 2000);
   }, []);
 
+
+  useFocusEffect(
+        useCallback(() => {
+        getDataPesananBarang();
+      }, [])
+  );
+
   useEffect(() => {
     getDataPesananBarang();
   }, []);
@@ -136,7 +188,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.headerProfile}>
-        <Text style={{ color: '#585858', fontWeight: 'bold', fontSize: 16,textTransform:'capitalize' }}>Selamat Pagi, {namaUser}!</Text>
+        <Text style={{ color: '#585858', fontWeight: 'bold', fontSize: 16,textTransform:'capitalize' }}>Semangat Pagi, {namaUser}!</Text>
         <TouchableOpacity style={styles.avatarContainer} onPress={handleProfile}>
           <Image
             source={{ uri: 'https://i.pravatar.cc/100' }} // Ganti dengan avatar user
@@ -169,7 +221,19 @@ export default function HomeScreen() {
             renderItem={renderOrderBarang}
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
-          /></ScrollView>
+             ListEmptyComponent={
+              <View style={{ alignItems: 'center', marginTop: 50 }}>
+                <Image
+                  source={require('./../assets/images/empty.png')}
+                  style={{ width: 150, height: 150, marginBottom: 15 }}
+                  resizeMode="contain"
+                />
+                <Text style={{ textAlign: 'center', color: '#888', fontSize: 16 }}>
+                  tidak ada data
+                </Text>
+              </View>
+            }
+           /></ScrollView>
       </View>
     </View>
   );

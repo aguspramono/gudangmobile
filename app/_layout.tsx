@@ -28,6 +28,8 @@ function Layout() {
       <Stack.Screen name="homeScreen" options={{ headerShown: false }} />
       <Stack.Screen name="detailPesanBarang" options={{ headerShown: false }} />
       <Stack.Screen name="pesananScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="orderScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="detailOrderBarang" options={{ headerShown: false }} />
       <Stack.Screen name="profileScreen" options={{ headerShown: false }} />
 
     </Stack>
