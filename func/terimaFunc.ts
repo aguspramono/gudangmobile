@@ -18,3 +18,16 @@ export const getAllTerimaRequest = async (wherelike: string, pageprev: number, p
         throw error;
     }
 };
+
+export const getAllTerimaPerItemRequest = async (wherelike: string, pageprev: number, page: number, option: string, filter: string, tanggaldari: string, tanggalsampai: string, bulan: string, tahun: string) => {
+    try {
+        const response = await axios.get(
+            `${baseUrl}stockpurch/dataperitem?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`, { headers: headers }
+        );
+
+        return response.data.dataStockPurchPerItem;
+    } catch (error) {
+        console.error("Error terima request:", error);
+        throw error;
+    }
+};

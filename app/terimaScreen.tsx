@@ -14,14 +14,16 @@ import {
   Button,
 } from "react-native";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { getAllTerimaRequest } from "./../func/terimaFunc";
+import {
+  getAllTerimaRequest,
+  getAllTerimaPerItemRequest,
+} from "./../func/terimaFunc";
 import { router, useFocusEffect } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { DateFormat } from "./../func/global/globalFunc";
 
 export default function terimaScreen() {
-
   const [terimabarang, setTerimaBarang] = useState<any[]>([]);
   const [page, setPage] = useState(0);
   const [peritem, setPeritem] = useState(false);
@@ -37,6 +39,7 @@ export default function terimaScreen() {
 
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [lastStatusReq, setLastStatusReq] = useState("");
 
   let limitPage = 0;
   let nextPageAct = 0;
@@ -51,39 +54,115 @@ export default function terimaScreen() {
     tanggalsampai: string,
     bulan: string,
     tahun: string,
-    setReq: string
+    setReq: string,
+    statusReq: string
   ) => {
     const terimabarangitem = [];
-    const response = await getAllTerimaRequest(
-      like,
-      limitqueryprev,
-      limitquery,
-      option,
-      filter,
-      tanggaldari,
-      tanggalsampai,
-      bulan,
-      tahun
-    );
 
-    response.map((item, i) =>
-      terimabarangitem.push({
-        id: item.NoInvoice + page + i,
-        noinv: item.NoInvoice,
-        detail: item.Qtty + " item terima barang",
-        tanggal: item.Tanggal
-      })
-    );
+    if (statusReq !== lastStatusReq) {
+      setTerimaBarang([]);
+    }
 
-    if (setReq === "filter") {
+    if (statusReq === "perItem") {
+      const response = await getAllTerimaPerItemRequest(
+        like,
+        limitqueryprev,
+        limitquery,
+        option,
+        filter,
+        tanggaldari,
+        tanggalsampai,
+        bulan,
+        tahun
+      );
+
+      response.map((item, i) => {
+        let total = 0;
+        total = parseFloat(item.Qtty) * parseFloat(item.Harga);
+        
+
+
+        let jumlahgrandvaldiskon = 0;
+            let jumlahgrandvalppn = 0;
+            let diskonGrand= parseFloat(item.Disc);
+            let ppngrand= parseFloat(item.PPn);
+            let nominaldiskongrand= parseFloat(item.NominalDisc);
+            let nominalppngrand= parseFloat(item.NominalPPn);
+            if (isNaN(item.Disc) || item.Disc==null || item.Disc=="") {
+                diskonGrand=0;
+            }
+
+            if (isNaN(item.PPn) || item.PPn==null || item.PPn=="") {
+                ppngrand=0
+            }
+
+            if (isNaN(item.NominalDisc) || item.NominalDisc==null || item.NominalDisc=="") {
+                nominalppngrand=0;
+            }
+
+            if (isNaN(item.NominalDisc) || item.NominalDisc==null || item.NominalDisc=="") {
+                nominaldiskongrand=0;
+            }
+
+            jumlahgrandvaldiskon = total - (total * diskonGrand) / 100;
+            jumlahgrandvalppn =
+                jumlahgrandvaldiskon + (jumlahgrandvaldiskon * ppngrand) / 100;
+
+            jumlahgrandvalppn =
+                jumlahgrandvalppn + nominalppngrand - nominaldiskongrand;
+
+
+
+        terimabarangitem.push({
+          id: item.InvNum + page + i + "peritem",
+          noinv: item.InvNum,
+          detail: item.Qtty + " item terima barang",
+          tanggal: item.Tgl,
+          namasupplier: item.namaSupplier,
+          nopo: item.NoPo,
+          namaproduk: item.namaProduct,
+          qtty: item.Qtty,
+          harga:item.Harga,
+          disc: item.Disc,
+          ppn:item.PPn,
+          gudang: item.Gudang,
+          total: jumlahgrandvalppn,
+        });
+      });
+    } else {
+      const response = await getAllTerimaRequest(
+        like,
+        limitqueryprev,
+        limitquery,
+        option,
+        filter,
+        tanggaldari,
+        tanggalsampai,
+        bulan,
+        tahun
+      );
+
+      response.map((item, i) =>
+        terimabarangitem.push({
+          id: item.NoInvoice + page + i + "noitem",
+          noinv: item.NoInvoice,
+          detail: item.Qtty + " item terima barang",
+          tanggal: item.Tanggal,
+        })
+      );
+    }
+
+
+    if (setReq === "filter" || statusReq !== lastStatusReq) {
       setTerimaBarang(terimabarangitem);
     } else {
       setTerimaBarang([...terimabarang, ...terimabarangitem]);
     }
+
+    setLastStatusReq(statusReq);
   };
 
-  const nextPage = async () => {
-
+  const nextPage = async (statusReq: string) => {
     let tanggaldari = "2025-07-07";
     let tanggalsampai = "2025-07-07";
 
@@ -91,8 +170,38 @@ export default function terimaScreen() {
       tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
       tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
     }
-    const response = await getAllTerimaRequest(ketTerima, 0, 0, optionfilter, optionfiltertanggal, tanggaldari, tanggalsampai, optionbulan, optionTahun);
-    limitPage = Math.ceil(response.length / 10);
+
+    let jumlahdataresponse = 0;
+    if (statusReq == "perItem") {
+      const response = await getAllTerimaPerItemRequest(
+        ketTerima,
+        0,
+        0,
+        optionfilter,
+        optionfiltertanggal,
+        tanggaldari,
+        tanggalsampai,
+        optionbulan,
+        optionTahun
+      );
+      jumlahdataresponse = response.length;
+    } else {
+      const response = await getAllTerimaRequest(
+        ketTerima,
+        0,
+        0,
+        optionfilter,
+        optionfiltertanggal,
+        tanggaldari,
+        tanggalsampai,
+        optionbulan,
+        optionTahun
+      );
+
+      jumlahdataresponse = response.length;
+    }
+
+    limitPage = Math.ceil(jumlahdataresponse / 10);
 
     if (page >= limitPage) {
       setPage(limitPage);
@@ -103,43 +212,111 @@ export default function terimaScreen() {
     nextPageAct = limitQuery + 30;
     setLimitQuery(nextPageAct);
 
-    if (nextPageAct >= response.length) {
-      nextPageAct = response.length;
+    if (nextPageAct >= jumlahdataresponse) {
+      nextPageAct = jumlahdataresponse;
       setLimitQuery(nextPageAct);
     }
 
-    fetchData(
-      ketTerima,
-      nextPageAct,
-      30,
-      optionfilter,
-      optionfiltertanggal,
-      tanggaldari,
-      tanggalsampai,
-      optionbulan,
-      optionTahun,
-      ""
-    );
+    if (statusReq == "perItem") {
+      fetchData(
+        ketTerima,
+        nextPageAct,
+        30,
+        optionfilter,
+        optionfiltertanggal,
+        tanggaldari,
+        tanggalsampai,
+        optionbulan,
+        optionTahun,
+        "",
+        "perItem"
+      );
+    } else {
+      fetchData(
+        ketTerima,
+        nextPageAct,
+        30,
+        optionfilter,
+        optionfiltertanggal,
+        tanggaldari,
+        tanggalsampai,
+        optionbulan,
+        optionTahun,
+        "",
+        ""
+      );
+    }
   };
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback((statusReq: string) => {
     setRefreshing(true);
-    fetchData(
-      ketTerima,
-      0,
-      30,
-      optionfilter,
-      optionfiltertanggal,
-      "2025-01-01",
-      "2025-12-31",
-      optionbulan,
-      optionTahun,
-      '',
-    );
+    if (statusReq == "perItem") {
+      fetchData(
+        ketTerima,
+        0,
+        30,
+        optionfilter,
+        optionfiltertanggal,
+        "2025-01-01",
+        "2025-12-31",
+        optionbulan,
+        optionTahun,
+        "",
+        "perItem"
+      );
+    } else {
+      fetchData(
+        ketTerima,
+        0,
+        30,
+        optionfilter,
+        optionfiltertanggal,
+        "2025-01-01",
+        "2025-12-31",
+        optionbulan,
+        optionTahun,
+        "",
+        ""
+      );
+    }
+
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
   }, []);
+
+  const handleDataPerItem = (status: string) => {
+    //console.log(!peritem)
+    if (status == "perItem") {
+      fetchData(
+        ketTerima,
+        0,
+        30,
+        optionfilter,
+        optionfiltertanggal,
+        "2025-01-01",
+        "2025-12-31",
+        optionbulan,
+        optionTahun,
+        "",
+        ""
+      );
+    } else {
+      fetchData(
+        ketTerima,
+        0,
+        30,
+        optionfilter,
+        optionfiltertanggal,
+        "2025-01-01",
+        "2025-12-31",
+        optionbulan,
+        optionTahun,
+        "",
+        "perItem"
+      );
+    }
+  };
 
   useEffect(() => {
     fetchData(
@@ -152,7 +329,8 @@ export default function terimaScreen() {
       "2025-12-31",
       optionbulan,
       optionTahun,
-      '',
+      "",
+      ""
     );
   }, []);
 
@@ -192,6 +370,102 @@ export default function terimaScreen() {
             }}
           >
             <Text style={{ marginTop: 5 }}>{item.detail}</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderTerimaBarangItem = ({ item }) => {
+    return (
+      <TouchableOpacity
+        style={{
+          marginTop: 8,
+          paddingVertical: 10,
+          paddingHorizontal: 15,
+          borderRadius: 15,
+          backgroundColor: "#fff",
+        }}
+        onPress={() => console.log(item.noinv)}
+      >
+        <View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ fontWeight: "bold", color: "#585858" }}>
+              Inv : {item.noinv}
+            </Text>
+            <Text style={{ color: "#585858", fontSize: 12 }}>
+              Tgl: {item.tanggal}
+            </Text>
+          </View>
+
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: 5,
+              }}
+            >
+              <Text>Supplier : </Text>
+              <Text style={{ width: 280, textAlign: "right" }}>
+                {item.namasupplier}
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: 5,
+              }}
+            >
+              <Text>No. PO : </Text>
+              <Text style={{ width: 280, textAlign: "right" }}>
+                {item.nopo}
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: 5,
+              }}
+            >
+              <Text>Produk : </Text>
+              <Text style={{ width: 280, textAlign: "right" }}>
+                {item.namaproduk}
+              </Text>
+            </View>
+          </View>
+
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              backgroundColor: "#A0C4FF20",
+              paddingHorizontal: 10,
+              paddingVertical: 3,
+              marginTop: 5,
+              borderRadius: 10,
+            }}
+          >
+            <Text style={{ color: "#585858", fontSize: 12 }}>
+              {"Qtty : " +
+                item.qtty +
+                " | Hrga : "+ item.harga +
+                " | Disc : " +
+                item.disc +
+                " | PPN : " +
+                item.ppn +
+                " | Jmlh : " +
+                item.total}
+            </Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -241,52 +515,58 @@ export default function terimaScreen() {
           }}
           onPress={() => console.log(true)}
         >
-          <MaterialCommunityIcons
-            name="printer"
-            size={26}
-            color="#fff"
-          />
+          <MaterialCommunityIcons name="printer" size={26} color="#fff" />
         </TouchableOpacity>
 
         <TouchableOpacity
           style={{
             backgroundColor: peritem == false ? "#ecececff" : "#0085c8",
             paddingHorizontal: 10,
-            display: 'flex',
-            justifyContent: 'center',
-            alignContent: 'center',
+            display: "flex",
+            justifyContent: "center",
+            alignContent: "center",
             borderRadius: 5,
             marginRight: 8,
           }}
-          onPress={() => setPeritem(!peritem)}
+          onPress={() => {
+            setPeritem(!peritem),
+              peritem == false
+                ? handleDataPerItem("")
+                : handleDataPerItem("perItem");
+          }}
         >
-          <Text style={{ color: peritem ? "#fff" : "#000" }}>Lihat PerItem</Text>
+          <Text style={{ color: peritem ? "#fff" : "#000" }}>
+            Lihat  {peritem == false
+                ? "PerItem"
+                : "PerInvoice"}
+          </Text>
         </TouchableOpacity>
       </View>
-
 
       <View>
         <FlatList
           data={terimabarang}
-          renderItem={renderTerimaBarang}
+          renderItem={
+            peritem == false ? renderTerimaBarang : renderTerimaBarangItem
+          }
           keyExtractor={(item) => item.id}
           onEndReached={() => {
-            nextPage();
+            peritem == false ? nextPage("") : nextPage("perItem");
           }}
           onEndReachedThreshold={0.5}
           ListFooterComponent={loading && <ActivityIndicator size="large" />}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              onRefresh={onRefresh}
+              onRefresh={() => {
+                peritem == false ? onRefresh("") : onRefresh("perItem");
+              }}
               colors={["#9Bd35A", "#689F38"]}
             />
           }
           style={{ marginBottom: 20 }}
         />
       </View>
-
-
     </View>
   );
 }
