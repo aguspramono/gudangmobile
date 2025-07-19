@@ -46,3 +46,9 @@ export const getOrderDetailRequestByID = async(nopo:string) =>{
     throw error;
   }
 }
+
+export const printPesananRequest = async (kode:string) => {
+ 
+  return `${baseUrl}stockpo/printlaporanbyid?nomorinv=${kode}`;
+   
+}

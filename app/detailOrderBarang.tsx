@@ -13,7 +13,9 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useRoute } from '@react-navigation/native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Link, router } from "expo-router";
-import { getOrderRequestByID, getOrderDetailRequestByID } from './../func/orderFunc';
+import CustomAlert from './../component/sweetalert';
+import { WebView } from 'react-native-webview';
+import { getOrderRequestByID, getOrderDetailRequestByID,printPesananRequest } from './../func/orderFunc';
 
 
 function detailOrderBarang() {
@@ -32,56 +34,56 @@ function detailOrderBarang() {
     const [diskonnominalgrand, setDiskonnominalgrand] = useState(0);
     const [ppnnominalgrand, setPpnnominalgrand] = useState(0);
     const [grandtotalsum, setGrandtotalsum] = useState(0);
+    const [pdfUri, setPdfUri] = useState(null);
 
     const [refreshing, setRefreshing] = useState(false);
-    const isFirstRun = useRef(true);
+    const [showAlertInfoDownload, setShowAlertInfoDownload] = useState(false);
 
-    const updateSummary = () => {
-        console.log(orderbarangdetail)
-        if (orderbarangdetail.length < 1) {
-            setJumlahqty(0);
-            setJumlahrp(0);
-        } else {
-            let jumlahqtyval = 0;
-            let jumlahrpval = 0;
-            orderbarangdetail.map((item) => {
-                jumlahqtyval = jumlahqtyval + parseFloat(item.qtybarang);
-                jumlahrpval = jumlahrpval + parseFloat(item.jumlahbarang);
-            });
+    // const updateSummary = () => {
+    //     if (orderbarangdetail.length < 1) {
+    //         setJumlahqty(0);
+    //         setJumlahrp(0);
+    //     } else {
+    //         let jumlahqtyval = 0;
+    //         let jumlahrpval = 0;
+    //         orderbarangdetail.map((item) => {
+    //             jumlahqtyval = jumlahqtyval + parseFloat(item.qtybarang);
+    //             jumlahrpval = jumlahrpval + parseFloat(item.jumlahbarang);
+    //         });
 
-            setJumlahqty(jumlahqtyval);
-            setJumlahrp(jumlahrpval);
-            setGrandtotal(jumlahrpval);
-        }
-    };
+    //         setJumlahqty(jumlahqtyval);
+    //         setJumlahrp(jumlahrpval);
+    //         setGrandtotal(jumlahrpval);
+    //     }
+    // };
 
-    const updateGrandtotal = () => {
-        let jumlahgrandvaldiskon = 0;
-        let jumlahgrandvalppn = 0;
-        if (isNaN(diskongrand)) {
-            setDiskongrand(0);
-        }
+    // const updateGrandtotal = () => {
+    //     let jumlahgrandvaldiskon = 0;
+    //     let jumlahgrandvalppn = 0;
+    //     if (isNaN(diskongrand)) {
+    //         setDiskongrand(0);
+    //     }
 
-        if (isNaN(ppngrand)) {
-            setPpngrand(0);
-        }
+    //     if (isNaN(ppngrand)) {
+    //         setPpngrand(0);
+    //     }
 
-        if (isNaN(ppnnominalgrand)) {
-            setPpnnominalgrand(0);
-        }
+    //     if (isNaN(ppnnominalgrand)) {
+    //         setPpnnominalgrand(0);
+    //     }
 
-        if (isNaN(diskonnominalgrand)) {
-            setDiskonnominalgrand(0);
-        }
+    //     if (isNaN(diskonnominalgrand)) {
+    //         setDiskonnominalgrand(0);
+    //     }
 
-        jumlahgrandvaldiskon = jumlahrp - (jumlahrp * diskongrand) / 100;
-        jumlahgrandvalppn =
-            jumlahgrandvaldiskon + (jumlahgrandvaldiskon * ppngrand) / 100;
+    //     jumlahgrandvaldiskon = jumlahrp - (jumlahrp * diskongrand) / 100;
+    //     jumlahgrandvalppn =
+    //         jumlahgrandvaldiskon + (jumlahgrandvaldiskon * ppngrand) / 100;
 
-        jumlahgrandvalppn =
-            jumlahgrandvalppn + ppnnominalgrand - diskonnominalgrand;
-        setGrandtotalsum(jumlahgrandvalppn);
-    };
+    //     jumlahgrandvalppn =
+    //         jumlahgrandvalppn + ppnnominalgrand - diskonnominalgrand;
+    //     setGrandtotalsum(jumlahgrandvalppn);
+    // };
 
 
     const fetchData = async () => {
@@ -94,8 +96,17 @@ function detailOrderBarang() {
             setDiskonnominalgrand(data[0]["NominalDisc"]);
             setPpnnominalgrand(data[0]["NominalPPn"]);
 
+            if (dataDetail.length < 1) {
+                setJumlahqty(0);
+                setJumlahrp(0);
+            }
+
+            let jumlahqtyval = 0;
+            let jumlahrpval = 0;
+
             const orderbarangdetailarr = [];
             dataDetail.map((item, i) => {
+                
                 let total = 0;
                 if (parseFloat(item.Disc) > 0) {
                     total =
@@ -107,6 +118,9 @@ function detailOrderBarang() {
                 } else {
                     total = parseFloat(item.Qtty) * parseFloat(item.hBeliEnd);
                 }
+
+                jumlahqtyval = jumlahqtyval + parseFloat(item.Qtty);
+                jumlahrpval = jumlahrpval + total;
 
                 orderbarangdetailarr.push({
                     id: item.NoPesanan + i,
@@ -126,10 +140,43 @@ function detailOrderBarang() {
             } else {
                 setDepartemen(null);
             }
-            setOrderBarangDetail(orderbarangdetailarr);
 
-            //updateSummary();
-            //updateGrandtotal();
+            setJumlahqty(jumlahqtyval);
+            setJumlahrp(jumlahrpval);
+            setGrandtotal(jumlahrpval);
+            setOrderBarangDetail(orderbarangdetailarr);
+            
+            //hitung grand total
+            let jumlahgrandvaldiskon = 0;
+            let jumlahgrandvalppn = 0;
+            let diskonGrand= parseFloat(data[0]["Disc"]);
+            let ppngrand= parseFloat(data[0]["PPn"]);
+            let nominaldiskongrand= parseFloat(data[0]["NominalDisc"]);
+            let nominalppngrand= parseFloat(data[0]["NominalPPn"]);
+            if (isNaN(data[0]["Disc"]) || data[0]["Disc"]==null || data[0]["Disc"]=="") {
+                diskonGrand=0;
+            }
+
+            if (isNaN(data[0]["PPn"]) || data[0]["PPn"]==null || data[0]["PPn"]=="") {
+                ppngrand=0
+            }
+
+            if (isNaN(data[0]["NominalPPn"]) || data[0]["NominalPPn"]==null || data[0]["NominalPPn"]=="") {
+                nominalppngrand=0;
+            }
+
+            if (isNaN(data[0]["NominalDisc"]) || data[0]["NominalDisc"]==null || data[0]["NominalDisc"]=="") {
+                nominaldiskongrand=0;
+            }
+
+            jumlahgrandvaldiskon = jumlahrpval - (jumlahrpval * diskonGrand) / 100;
+            jumlahgrandvalppn =
+                jumlahgrandvaldiskon + (jumlahgrandvaldiskon * ppngrand) / 100;
+
+            jumlahgrandvalppn =
+                jumlahgrandvalppn + nominalppngrand - nominaldiskongrand;
+
+            setGrandtotalsum(jumlahgrandvalppn);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -147,17 +194,15 @@ function detailOrderBarang() {
         }, 2000);
     }, []);
 
+    const handlePrint = async () => {
+        const url = await printPesananRequest(id);
+        setPdfUri(url);
+        setShowAlertInfoDownload(true)
+    }
+
     useEffect(() => {
-
-
         fetchData();
-
-        if (orderbarangdetail && orderbarangdetail.length > 0) {
-            updateSummary();
-            updateGrandtotal();
-        }
-
-    }, [orderbarangdetail]);
+    }, []);
 
     const renderDetailOrderBarang = ({ item }) => {
         return (
@@ -237,10 +282,23 @@ function detailOrderBarang() {
                         </View>
 
                         <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                            <TouchableOpacity style={{ flex: 1, backgroundColor: '#0085c8', paddingVertical: 10, borderRadius: 10, marginRight: 5 }} onPress={() => console.log()}>
+                            <TouchableOpacity style={{ flex: 1, backgroundColor: '#0085c8', paddingVertical: 10, borderRadius: 10, marginRight: 5 }} onPress={() =>{handlePrint()}}>
                                 <Text style={{ color: '#fff', textAlign: 'center' }}>Cetak PDF</Text>
                             </TouchableOpacity>
                         </View>
+
+                         {pdfUri && (
+                                <>
+                                    <View>
+                                        <WebView
+                                            source={{ uri: pdfUri }}
+                                            originWhitelist={['*']}
+                                            useWebKit
+                                            javaScriptEnabled
+                                        />
+                                    </View>
+                                </>
+                            )}
                     </View>
                 ))}
 
@@ -291,6 +349,19 @@ function detailOrderBarang() {
                     </View>
                 </View>
             </View>
+
+            <CustomAlert
+                visible={showAlertInfoDownload}
+                title="Sukses!"
+                message="Laporan berhasil didownload."
+                icon={require('./../assets/images/success.png')}
+                onClose={() => { setPdfUri(null), setShowAlertInfoDownload(false) }}
+                onAcc={() => { }}
+                onDec={() => setShowAlertInfoDownload(false)}
+                option=""
+                textconfirmacc=""
+                textconfirmdec=""
+            />
         </View>
     );
 }

@@ -64,6 +64,8 @@ export default function HomeScreen() {
       router.navigate({ pathname: "pesananScreen" });
     }else if(itemId=="1"){
       router.navigate({ pathname: "orderScreen" });
+    }else if(itemId=="2"){
+      router.navigate({ pathname: "terimaScreen" });
     }
     Animated.sequence([
       Animated.timing(scaleAnim, { toValue: 1.1, duration: 100, useNativeDriver: true }),

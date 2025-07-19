@@ -10,7 +10,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { StatusBar } from "expo-status-bar";
 import { useRoute } from '@react-navigation/native';
 import { Link, router } from "expo-router";
-import { getPesananRequestByID, getPesananDetailRequestByID, updateStatusPesananRequest, printPesananRequest,checkuserpremis } from './../func/pesananFunc';
+import { getPesananRequestByID, getPesananDetailRequestByID, updateStatusPesananRequest, printPesananRequest, checkuserpremis } from './../func/pesananFunc';
 import { FontAwesome } from '@expo/vector-icons';
 import CustomAlert from './../component/sweetalert';
 import { WebView } from 'react-native-webview';
@@ -68,14 +68,14 @@ function detailPesanBarang() {
             const diketahui = await checkuserpremis(data[0]["diketahui"]);
             const disetujui = await checkuserpremis(data[0]["disetujui"]);
 
-            if(diketahui.length>0){
-                setUserDiket(diketahui[0]["NamaPeg"]==null?"-":diketahui[0]["NamaPeg"]);
-                setUserDiset(disetujui[0]["NamaPeg"]==null?"-":disetujui[0]["NamaPeg"]);
-            }else{
+            if (diketahui.length > 0) {
+                setUserDiket(diketahui[0]["NamaPeg"] == null ? "-" : diketahui[0]["NamaPeg"]);
+                setUserDiset(disetujui[0]["NamaPeg"] == null ? "-" : disetujui[0]["NamaPeg"]);
+            } else {
                 setUserDiket(null);
                 setUserDiset(null);
             }
-            
+
             setPesananBarang(data);
             const pesananbarangdetailarr = [];
             dataDetail.map((item, i) => (
@@ -90,12 +90,12 @@ function detailPesanBarang() {
                     alokasi: item.Alokasi,
                 })
             ));
-            if(dataDetail.length>0){
+            if (dataDetail.length > 0) {
                 setDepartemen(dataDetail[0].Departemen);
-            }else{
+            } else {
                 setDepartemen(null);
             }
-            
+
             setPesananBarangDetail(pesananbarangdetailarr);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -124,25 +124,25 @@ function detailPesanBarang() {
 
     const handlePressOrderBarangFunc = (status) => {
         if (status === "terima") {
-            updateStatusPesananRequest(id, "onprocess",userName)
+            updateStatusPesananRequest(id, "onprocess", userName)
                 .then((response) => {
-                    if(response["message"]==="error"){
+                    if (response["message"] === "error") {
                         setMessagegagal(response["error"]);
                         setShowAlertInfoGagal(true);
-                    }else{
-                        setShowAlertInfo(true); 
+                    } else {
+                        setShowAlertInfo(true);
                     }
                     fetchData();
                 })
                 .catch((error) => { console.error("Error updating pesanan status:", error); });
         } else if (status === "tolak") {
-            updateStatusPesananRequest(id, "rejected",userName)
-                .then((response) => { 
-                    if(response["message"]==="error"){
+            updateStatusPesananRequest(id, "rejected", userName)
+                .then((response) => {
+                    if (response["message"] === "error") {
                         setMessagegagal(response["error"]);
                         setShowAlertInfoGagal(true);
-                    }else{
-                        setShowAlertInfo(true); 
+                    } else {
+                        setShowAlertInfo(true);
                     }
                     fetchData();
                 })
@@ -172,16 +172,17 @@ function detailPesanBarang() {
                     </View>
 
                     <View>
-                        <View>
-                            <Text style={{ marginTop: 5 }}>
-                                {item.deskripsi}
-                            </Text>
-                            <Text>
-                                {item.alokasi}
-                            </Text>
-                            <Text>
-                                {item.lokasi}
-                            </Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
+                            <Text>Detail : </Text>
+                            <Text style={{ width: 280, textAlign: 'right' }}>{item.deskripsi}</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
+                            <Text>Alokasi : </Text>
+                            <Text style={{ width: 280, textAlign: 'right' }}>{item.alokasi}</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
+                            <Text>Lokasi : </Text>
+                            <Text style={{ width: 280, textAlign: 'right' }}>{item.lokasi}</Text>
                         </View>
                     </View>
 
@@ -207,7 +208,7 @@ function detailPesanBarang() {
 
     return (
         <View style={styles.container}>
-            
+
             <View style={{ flexDirection: "row", marginBottom: 10 }}>
                 <TouchableOpacity onPress={handleBack} style={{
                     padding: 15,
@@ -231,7 +232,7 @@ function detailPesanBarang() {
                     <View key={i} style={{ padding: 10, backgroundColor: '#A0C4FF20', borderRadius: 10 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: item["statusdiset"] == "pending" ? '#FFD666' : item["statusdiset"] == "onprocess" ? '#A0C4FF' : item["statusdiset"] == "rejected" ? '#FFB6B6' : '#9DE0AD', paddingHorizontal: 10, paddingVertical: 3, marginBottom: 10 }}>
                             <Text style={{ color: "#585858", fontSize: 12, textTransform: 'capitalize' }}>
-                                {(item["statusdiset"] == "pending" || item.diketahui == "pending" ? "Menunggu" : (item["statusdiset"] == null || item["statusdiset"] == "" || item["statusdiset"] == "done" ? "Selesai" :item["statusdiset"] == "rejected"?"Ditolak":''))}
+                                {(item["statusdiset"] == "pending" || item.diketahui == "pending" ? "Menunggu" : (item["statusdiset"] == null || item["statusdiset"] == "" || item["statusdiset"] == "done" ? "Selesai" : item["statusdiset"] == "rejected" ? "Ditolak" : ''))}
                             </Text>
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -261,25 +262,25 @@ function detailPesanBarang() {
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
                             <Text>Diketahui</Text>
-                            <Text style={{ fontWeight: 'bold' }}>{userdiket==null?"-":userdiket}
+                            <Text style={{ fontWeight: 'bold' }}>{userdiket == null ? "-" : userdiket}
                                 {item["statusdiket"] === "onprocess" && (
                                     <Image
-                                    source={require('./../assets/images/success.png')}
-                                    style={{ width: 12, height: 12 }}
-                                />
-                                )} 
-                                
+                                        source={require('./../assets/images/success.png')}
+                                        style={{ width: 12, height: 12 }}
+                                    />
+                                )}
+
                             </Text>
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
                             <Text>Disetujui</Text>
-                            <Text style={{ fontWeight: 'bold' }}>{userdiset==null?"-":userdiset}
+                            <Text style={{ fontWeight: 'bold' }}>{userdiset == null ? "-" : userdiset}
                                 {item["statusdiset"] === "onprocess" && (
                                     <Image
-                                    source={require('./../assets/images/success.png')}
-                                    style={{ width: 12, height: 12 }}
-                                />
-                                )} 
+                                        source={require('./../assets/images/success.png')}
+                                        style={{ width: 12, height: 12 }}
+                                    />
+                                )}
                             </Text>
                         </View>
                         <View style={{ flexDirection: 'row', marginTop: 10 }}>
@@ -329,14 +330,14 @@ function detailPesanBarang() {
                         scrollEnabled={false}
                         ListEmptyComponent={
                             <View style={{ alignItems: 'center', marginTop: 50 }}>
-                            <Image
-                                source={require('./../assets/images/empty.png')}
-                                style={{ width: 150, height: 150, marginBottom: 15 }}
-                                resizeMode="contain"
-                            />
-                            <Text style={{ textAlign: 'center', color: '#888', fontSize: 16 }}>
-                                tidak ada data
-                            </Text>
+                                <Image
+                                    source={require('./../assets/images/empty.png')}
+                                    style={{ width: 150, height: 150, marginBottom: 15 }}
+                                    resizeMode="contain"
+                                />
+                                <Text style={{ textAlign: 'center', color: '#888', fontSize: 16 }}>
+                                    tidak ada data
+                                </Text>
                             </View>
                         }
                     /></ScrollView>
