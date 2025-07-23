@@ -282,7 +282,7 @@ const renderOrderBarang = ({ item }) => {
               ? "Menunggu"
               : item.statusdiset == null || item.statusdiset == "" || item.statusdiset == "done"
               ? "Selesai"
-              : item.statusdiset == "rejected" ? "Ditolak":''}
+              : item.statusdiset == "rejected" ? "Ditolak":"Diproses"}
           </Text>
         </View>
       </View>
@@ -373,7 +373,7 @@ return (
             colors={["#9Bd35A", "#689F38"]}
           />
         }
-        style={{ marginBottom: 20 }}
+        style={{ marginBottom: 120 }}
       />
     </View>
 

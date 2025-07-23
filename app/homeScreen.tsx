@@ -66,6 +66,8 @@ export default function HomeScreen() {
       router.navigate({ pathname: "orderScreen" });
     }else if(itemId=="2"){
       router.navigate({ pathname: "terimaScreen" });
+    }else if(itemId=="3"){
+      router.navigate({ pathname: "menuScreen" });
     }
     Animated.sequence([
       Animated.timing(scaleAnim, { toValue: 1.1, duration: 100, useNativeDriver: true }),
@@ -190,7 +192,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <View style={styles.headerProfile}>
-        <Text style={{ color: '#585858', fontWeight: 'bold', fontSize: 16,textTransform:'capitalize' }}>Semangat Pagi, {namaUser}!</Text>
+        <Text style={{ color: '#585858', fontWeight: 'bold', fontSize: 16,textTransform:'capitalize' }}>Hi, {namaUser}!</Text>
         <TouchableOpacity style={styles.avatarContainer} onPress={handleProfile}>
           <Image
             source={{ uri: 'https://i.pravatar.cc/100' }} // Ganti dengan avatar user

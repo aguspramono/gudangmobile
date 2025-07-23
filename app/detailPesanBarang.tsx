@@ -232,7 +232,7 @@ function detailPesanBarang() {
                     <View key={i} style={{ padding: 10, backgroundColor: '#A0C4FF20', borderRadius: 10 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: item["statusdiset"] == "pending" ? '#FFD666' : item["statusdiset"] == "onprocess" ? '#A0C4FF' : item["statusdiset"] == "rejected" ? '#FFB6B6' : '#9DE0AD', paddingHorizontal: 10, paddingVertical: 3, marginBottom: 10 }}>
                             <Text style={{ color: "#585858", fontSize: 12, textTransform: 'capitalize' }}>
-                                {(item["statusdiset"] == "pending" || item.diketahui == "pending" ? "Menunggu" : (item["statusdiset"] == null || item["statusdiset"] == "" || item["statusdiset"] == "done" ? "Selesai" : item["statusdiset"] == "rejected" ? "Ditolak" : ''))}
+                                {(item["statusdiset"] == "pending" || item.diketahui == "pending" ? "Menunggu" : (item["statusdiset"] == null || item["statusdiset"] == "" || item["statusdiset"] == "done" ? "Selesai" : item["statusdiset"] == "rejected" ? "Ditolak" : 'Diproses'))}
                             </Text>
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

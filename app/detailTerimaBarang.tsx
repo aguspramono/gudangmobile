@@ -15,16 +15,16 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Link, router } from "expo-router";
 import CustomAlert from './../component/sweetalert';
 import { WebView } from 'react-native-webview';
-import { getOrderRequestByID, getOrderDetailRequestByID,printPesananRequest } from './../func/orderFunc';
+import { getAllTerimaRequestbyId, getAllTerimaDetailRequestbyId,printPesananRequest } from './../func/terimaFunc';
 
 
-function detailOrderBarang() {
+function detailTerimaBarang() {
     const route = useRoute();
     const id = route.params['id'];
 
-    const [orderbarang, setOrderBarang] = useState<any[]>([]);
-    const [orderbarangdetail, setOrderBarangDetail] = useState<any[]>([]);
-    const [departemen, setDepartemen] = useState(false);
+    const [terimabarang, setTerimaBarang] = useState<any[]>([]);
+    const [terimabarangdetail, setTerimaBarangDetail] = useState<any[]>([]);
+    const [gudang, setGudang] = useState(false);
 
     const [jumlahqty, setJumlahqty] = useState(0);
     const [jumlahrp, setJumlahrp] = useState(0);
@@ -88,9 +88,9 @@ function detailOrderBarang() {
 
     const fetchData = async () => {
         try {
-            const data = await getOrderRequestByID(id);
-            const dataDetail = await getOrderDetailRequestByID(id);
-            setOrderBarang(data);
+            const data = await getAllTerimaRequestbyId(id);
+            const dataDetail = await getAllTerimaDetailRequestbyId(id);
+            setTerimaBarang(data);
             setDiskongrand(data[0]["Disc"]);
             setPpngrand(data[0]["PPn"]);
             setDiskonnominalgrand(data[0]["NominalDisc"]);
@@ -104,9 +104,9 @@ function detailOrderBarang() {
             let jumlahqtyval = 0;
             let jumlahrpval = 0;
 
-            const orderbarangdetailarr = [];
+            const terimabarangdetailarr = [];
             dataDetail.map((item, i) => {
-                
+
                 let total = 0;
                 if (parseFloat(item.Disc) > 0) {
                     total =
@@ -122,51 +122,57 @@ function detailOrderBarang() {
                 jumlahqtyval = jumlahqtyval + parseFloat(item.Qtty);
                 jumlahrpval = jumlahrpval + total;
 
-                orderbarangdetailarr.push({
-                    id: item.NoPesanan + i,
-                    kodebarang: item.Kode,
-                    namabarang: item.Nama,
-                    qtybarang: item.Qtty,
-                    satuanbarang: item.Satuan,
-                    hargabeliend: item.Harga,
-                    diskonbarang: item.Disc,
-                    jumlahbarang: total,
-                    nomorpesanan: item.NoPesanan,
-                    alokasi: item.Alokasi,
+                terimabarangdetailarr.push({
+                    id: item.InvNum + i + "peritem",
+                    noinv: item.InvNum,
+                    detail: item.Qtty + " item terima barang",
+                    tanggal: item.Tgl,
+                    namasupplier: item.namaSupplier,
+                    nopo: item.NoPo,
+                    namaproduk: item.Nama,
+                    qtty: item.Qtty,
+                    harga: item.Harga,
+                    disc: item.Disc,
+                    gudang: item.Gudang,
+                    total: total,
+                    alokasi:item.Alokasi,
+                    lokasi:item.Lokasi,
+                    kodebarang:item.Kode,
+                    satuan:item.Satuan
                 })
             });
             if (dataDetail.length > 0) {
-                setDepartemen(dataDetail[0].Departemen);
+                setGudang(dataDetail[0].Gudang);
             } else {
-                setDepartemen(null);
+                setGudang(null);
             }
 
             setJumlahqty(jumlahqtyval);
             setJumlahrp(jumlahrpval);
             setGrandtotal(jumlahrpval);
-            setOrderBarangDetail(orderbarangdetailarr);
-            
+            setTerimaBarangDetail(terimabarangdetailarr);
+
             //hitung grand total
             let jumlahgrandvaldiskon = 0;
             let jumlahgrandvalppn = 0;
-            let diskonGrand= parseFloat(data[0]["Disc"]);
-            let ppngrand= parseFloat(data[0]["PPn"]);
-            let nominaldiskongrand= parseFloat(data[0]["NominalDisc"]);
-            let nominalppngrand= parseFloat(data[0]["NominalPPn"]);
-            if (isNaN(data[0]["Disc"]) || data[0]["Disc"]==null || data[0]["Disc"]=="") {
-                diskonGrand=0;
+            let diskonGrand = parseFloat(data[0]["Disc"]);
+            let ppngrand = parseFloat(data[0]["PPn"]);
+            let nominaldiskongrand = parseFloat(data[0]["NominalDisc"]);
+            let nominalppngrand = parseFloat(data[0]["NominalPPn"]);
+            if (isNaN(data[0]["Disc"]) || data[0]["Disc"] == null || data[0]["Disc"] == "") {
+                diskonGrand = 0;
             }
 
-            if (isNaN(data[0]["PPn"]) || data[0]["PPn"]==null || data[0]["PPn"]=="") {
-                ppngrand=0
+            if (isNaN(data[0]["PPn"]) || data[0]["PPn"] == null || data[0]["PPn"] == "") {
+                ppngrand = 0
             }
 
-            if (isNaN(data[0]["NominalPPn"]) || data[0]["NominalPPn"]==null || data[0]["NominalPPn"]=="") {
-                nominalppngrand=0;
+            if (isNaN(data[0]["NominalPPn"]) || data[0]["NominalPPn"] == null || data[0]["NominalPPn"] == "") {
+                nominalppngrand = 0;
             }
 
-            if (isNaN(data[0]["NominalDisc"]) || data[0]["NominalDisc"]==null || data[0]["NominalDisc"]=="") {
-                nominaldiskongrand=0;
+            if (isNaN(data[0]["NominalDisc"]) || data[0]["NominalDisc"] == null || data[0]["NominalDisc"] == "") {
+                nominaldiskongrand = 0;
             }
 
             jumlahgrandvaldiskon = jumlahrpval - (jumlahrpval * diskonGrand) / 100;
@@ -204,30 +210,94 @@ function detailOrderBarang() {
         fetchData();
     }, []);
 
-    const renderDetailOrderBarang = ({ item }) => {
+    const renderDetailTerimaBarang = ({ item }) => {
         return (
-            <TouchableOpacity style={{ marginTop: 8, paddingVertical: 10, paddingHorizontal: 15, borderRadius: 15, backgroundColor: '#fff' }}>
+            <TouchableOpacity
+                style={{
+                    marginTop: 8,
+                    paddingVertical: 10,
+                    paddingHorizontal: 15,
+                    borderRadius: 15,
+                    backgroundColor: "#fff",
+                }}
+                onPress={() => console.log(item.noinv)}
+            >
                 <View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', color: "#585858" }}>K.Brg : {item.kodebarang}</Text>
-                        <Text style={{ color: "#585858", fontSize: 12 }}>No. Pesanan: {item.nomorpesanan}</Text>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
+                    >
+                        <Text style={{ fontWeight: "bold", color: "#585858" }}>
+                            K. Brg : {item.kodebarang}
+                        </Text>
+                        <Text style={{ color: "#585858", fontSize: 12 }}>
+                            No.PO: {item.nopo}
+                        </Text>
                     </View>
 
                     <View>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
-                            <Text>Detail : </Text>
-                            <Text style={{ width: 280, textAlign: 'right' }}>{item.namabarang}</Text>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                            }}
+                        >
+                            <Text>Produk : </Text>
+                            <Text style={{ width: 280, textAlign: "right" }}>
+                                {item.namaproduk}
+                            </Text>
                         </View>
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
+                         <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                            }}
+                        >
                             <Text>Alokasi : </Text>
-                            <Text style={{ width: 280, textAlign: 'right' }}>{item.alokasi}</Text>
+                            <Text style={{ width: 280, textAlign: "right" }}>
+                                {item.alokasi}
+                            </Text>
                         </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                            }}
+                        >
+                            <Text>Lokasi : </Text>
+                            <Text style={{ width: 280, textAlign: "right" }}>
+                                {item.lokasi}
+                            </Text>
+                        </View>
+                        
                     </View>
 
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#A0C4FF20', paddingHorizontal: 10, paddingVertical: 3, marginTop: 5, borderRadius: 10 }}>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            backgroundColor: "#A0C4FF20",
+                            paddingHorizontal: 10,
+                            paddingVertical: 3,
+                            marginTop: 5,
+                            borderRadius: 10,
+                        }}
+                    >
                         <Text style={{ color: "#585858", fontSize: 12 }}>
-                            {"Qtty : " + item.qtybarang + " " + item.satuanbarang + " | Harga : " + item.hargabeliend + " | Disc : " + item.diskonbarang + " | Jmlh : " + item.jumlahbarang}
+                            {"Qtty : " +
+                                item.qtty +" " + item.satuan +
+                                " | Hrga : " + item.harga +
+                                " | Disc : " +
+                                item.disc +
+                                " | Jmlh : " +
+                                item.total}
                         </Text>
                     </View>
                 </View>
@@ -257,7 +327,7 @@ function detailOrderBarang() {
             </View>
 
             <View>
-                {orderbarang?.map((item, i) => (
+                {terimabarang?.map((item, i) => (
                     <View key={i} style={{ padding: 10, backgroundColor: '#A0C4FF20', borderRadius: 10 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <Text>Tanggal</Text>
@@ -265,7 +335,7 @@ function detailOrderBarang() {
                         </View>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
-                            <Text>Nomor PO</Text>
+                            <Text>Nomor Invoice</Text>
                             <Text style={{ fontWeight: 'bold' }}>{id}</Text>
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
@@ -273,32 +343,32 @@ function detailOrderBarang() {
                             <Text style={{ fontWeight: 'bold', width: 230, textAlign: 'right' }}>{item["sNo_Acc"] + " - " + item["Nama"]}</Text>
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
-                            <Text>Departemen</Text>
-                            <Text style={{ fontWeight: 'bold' }}>{departemen}</Text>
+                            <Text>M. Pembayaran</Text>
+                            <Text style={{ fontWeight: 'bold' }}>{item["PayDueDay"] > 0 ? "Kredit" + " (" + item["PayDueDay"] + ")" : "Cash/Tunai"}</Text>
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
                             <Text>Gudang</Text>
-                            <Text style={{ fontWeight: 'bold' }}>{item["Gudang"]}</Text>
+                            <Text style={{ fontWeight: 'bold' }}>{gudang}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                            <TouchableOpacity style={{ flex: 1, backgroundColor: '#0085c8', paddingVertical: 10, borderRadius: 10, marginRight: 5 }} onPress={() =>{handlePrint()}}>
+                            <TouchableOpacity style={{ flex: 1, backgroundColor: '#0085c8', paddingVertical: 10, borderRadius: 10, marginRight: 5 }} onPress={() => { handlePrint() }}>
                                 <Text style={{ color: '#fff', textAlign: 'center' }}>Cetak PDF</Text>
                             </TouchableOpacity>
                         </View>
 
-                         {pdfUri && (
-                                <>
-                                    <View>
-                                        <WebView
-                                            source={{ uri: pdfUri }}
-                                            originWhitelist={['*']}
-                                            useWebKit
-                                            javaScriptEnabled
-                                        />
-                                    </View>
-                                </>
-                            )}
+                        {pdfUri && (
+                            <>
+                                <View>
+                                    <WebView
+                                        source={{ uri: pdfUri }}
+                                        originWhitelist={['*']}
+                                        useWebKit
+                                        javaScriptEnabled
+                                    />
+                                </View>
+                            </>
+                        )}
                     </View>
                 ))}
 
@@ -312,8 +382,8 @@ function detailOrderBarang() {
                     persistentScrollbar={false}
                     style={{ marginBottom: 460 }}
                 ><FlatList
-                        data={orderbarangdetail}
-                        renderItem={renderDetailOrderBarang}
+                        data={terimabarangdetail}
+                        renderItem={renderDetailTerimaBarang}
                         keyExtractor={(item) => item.id}
                         scrollEnabled={false}
                         ListEmptyComponent={
@@ -366,7 +436,7 @@ function detailOrderBarang() {
     );
 }
 
-export default detailOrderBarang;
+export default detailTerimaBarang;
 
 const styles = StyleSheet.create({
     container: {

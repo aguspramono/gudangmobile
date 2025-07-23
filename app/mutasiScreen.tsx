@@ -13,17 +13,17 @@ import {
 } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { getAllOrderRequest } from "./../func/orderFunc";
+import { getAllMutasiRequest } from "./../func/mutasiFunc";
 import { DateFormat } from "./../func/global/globalFunc";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { router, useFocusEffect } from "expo-router";
 
-function orderScreen() {
-    const [orderbarang, setOrderBarang] = useState<any[]>([]);
+function mutasiScreen() {
+    const [mutasibarang, setMutasiBarang] = useState<any[]>([]);
     const [page, setPage] = useState(0);
-    const [ketorder, setKetOrder] = useState("");
-    const [optionfilter, setoptionfilter] = useState("Nomor PO");
+    const [ketmutasi, setKetMutasi] = useState("");
+    const [optionfilter, setoptionfilter] = useState("Nomor Bukti");
     const [optionfiltertanggal, setoptionfiltertanggal] = useState("Semua");
     const [optionbulan, setOptionBulan] = useState("Bulan");
     const [optionTahun, setOptionTahun] = useState("Tahun");
@@ -37,7 +37,7 @@ function orderScreen() {
     const [isDatePickerVisibleSampai, setDatePickerVisibilitySampai] =
         useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    
+
     const showDatePickerDari = () => {
         setDatePickerVisibility(true);
     };
@@ -65,7 +65,7 @@ function orderScreen() {
     };
 
     const handlePressOrderBarang = (itemId) => {
-      router.navigate({ pathname: "detailOrderBarang", params: { id: itemId } });
+        router.navigate({ pathname: "detailMutasiBarang", params: { id: itemId } });
     };
 
     const fetchData = async (
@@ -80,8 +80,8 @@ function orderScreen() {
         tahun: string,
         setReq: string
     ) => {
-        const orderbarangitem = [];
-        const response = await getAllOrderRequest(
+        const mutasibarangitem = [];
+        const response = await getAllMutasiRequest(
             like,
             limitqueryprev,
             limitquery,
@@ -94,18 +94,18 @@ function orderScreen() {
         );
 
         response.map((item, i) =>
-            orderbarangitem.push({
-                id: item.NomorPO + page + i,
-                nopo: item.NomorPO,
-                detail: item.Qtty + " item order barang",
-                tanggal: item.Tanggal
+            mutasibarangitem.push({
+                id: item.NoBukti + page + i,
+                nobukti: item.NoBukti,
+                detail: item.jumlahItem + " item mutasi barang",
+                tanggal: item.Tgl
             })
         );
 
         if (setReq === "filter") {
-            setOrderBarang(orderbarangitem);
+            setMutasiBarang(mutasibarangitem);
         } else {
-            setOrderBarang([...orderbarang, ...orderbarangitem]);
+            setMutasiBarang([...mutasibarang, ...mutasibarangitem]);
         }
     };
 
@@ -121,7 +121,7 @@ function orderScreen() {
             tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
-        const response = await getAllOrderRequest(ketorder, 0, 0, optionfilter, optionfiltertanggal, tanggaldari, tanggalsampai, optionbulan, optionTahun);
+        const response = await getAllMutasiRequest(ketmutasi, 0, 0, optionfilter, optionfiltertanggal, tanggaldari, tanggalsampai, optionbulan, optionTahun);
         limitPage = Math.ceil(response.length / 10);
 
         if (page >= limitPage) {
@@ -139,7 +139,7 @@ function orderScreen() {
         }
 
         fetchData(
-            ketorder,
+            ketmutasi,
             nextPageAct,
             30,
             optionfilter,
@@ -161,7 +161,7 @@ function orderScreen() {
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
         fetchData(
-            ketorder,
+            ketmutasi,
             nextPageAct,
             30,
             optionfilter,
@@ -177,7 +177,7 @@ function orderScreen() {
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         fetchData(
-            ketorder,
+            ketmutasi,
             0,
             30,
             optionfilter,
@@ -195,7 +195,7 @@ function orderScreen() {
 
     useEffect(() => {
         fetchData(
-            ketorder,
+            ketmutasi,
             0,
             30,
             optionfilter,
@@ -208,8 +208,7 @@ function orderScreen() {
         );
     }, []);
 
-
-    const renderOrderBarang = ({ item }) => {
+    const renderMutasiBarang = ({ item }) => {
         return (
             <TouchableOpacity
                 style={{
@@ -219,7 +218,7 @@ function orderScreen() {
                     borderRadius: 15,
                     backgroundColor: "#fff",
                 }}
-                onPress={() => handlePressOrderBarang(item.nopo)}
+                onPress={() => handlePressOrderBarang(item.nobukti)}
             >
                 <View>
                     <View
@@ -230,7 +229,7 @@ function orderScreen() {
                         }}
                     >
                         <Text style={{ fontWeight: "bold", color: "#585858" }}>
-                            {item.nopo}
+                            {item.nobukti}
                         </Text>
                         <Text style={{ color: "#585858", fontSize: 12 }}>
                             {item.tanggal}
@@ -263,7 +262,7 @@ function orderScreen() {
                     marginTop: 15,
                 }}
             >
-                Order Barang
+                Mutasi Barang
             </Text>
 
             <View style={styles.containerfilter}>
@@ -304,8 +303,8 @@ function orderScreen() {
 
             <View>
                 <FlatList
-                    data={orderbarang}
-                    renderItem={renderOrderBarang}
+                    data={mutasibarang}
+                    renderItem={renderMutasiBarang}
                     keyExtractor={(item) => item.id}
                     onEndReached={() => {
                         nextPage();
@@ -474,7 +473,7 @@ function orderScreen() {
                                     <Picker
                                         selectedValue={optionTahun}
                                         style={styles.picker}
-                                        onValueChange={(itemValue) =>{setOptionTahun(itemValue)}
+                                        onValueChange={(itemValue) => { setOptionTahun(itemValue) }
                                         }
                                     >
                                         <Picker.Item key="xnxx" label="Pilih Tahun" value="Pilih Tahun" />
@@ -503,9 +502,9 @@ function orderScreen() {
                                     style={styles.picker}
                                     onValueChange={(itemValue) => setoptionfilter(itemValue)}
                                 >
-                                    <Picker.Item label="Nomor PO" value="Nomor PO" />
-                                    <Picker.Item label="Nama Supplier" value="Nama Supplier" />
-                                    <Picker.Item label="Departemen" value="Departemen" />
+                                    <Picker.Item label="Nomor Bukti" value="Nomor Bukti" />
+                                    <Picker.Item label="Dari Gudang" value="Dari Gudang" />
+                                    <Picker.Item label="Ke Gudang" value="Ke Gudang" />
                                 </Picker>
                             </View>
 
@@ -513,8 +512,8 @@ function orderScreen() {
                                 <TextInput
                                     style={{ fontSize: 17, paddingHorizontal: 10 }}
                                     placeholder={"Cari by " + optionfilter}
-                                    value={ketorder}
-                                    onChangeText={setKetOrder}
+                                    value={ketmutasi}
+                                    onChangeText={setKetMutasi}
                                 />
                             </View>
                         </View>
@@ -565,9 +564,10 @@ function orderScreen() {
             </Modal>
         </View>
     );
+
 }
 
-export default orderScreen;
+export default mutasiScreen;
 
 const styles = StyleSheet.create({
     container: {
@@ -589,52 +589,52 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
     },
-      modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-  bottomModal: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  modalText: {
-    fontSize: 16,
-    marginTop: 10,
-  },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.4)",
+    },
+    bottomModal: {
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+        backgroundColor: "#fff",
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+    },
+    modalText: {
+        fontSize: 16,
+        marginTop: 10,
+    },
     pickerContainer: {
-      borderRadius: 12,
-      backgroundColor: "#fff",
-      ...Platform.select({
-        android: {
-          borderWidth: 1,
-          borderColor: "#ccc",
-        },
-        ios: {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-        },
-      }),
-      overflow: "hidden",
+        borderRadius: 12,
+        backgroundColor: "#fff",
+        ...Platform.select({
+            android: {
+                borderWidth: 1,
+                borderColor: "#ccc",
+            },
+            ios: {
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+            },
+        }),
+        overflow: "hidden",
     },
     picker: {
-      height: 50,
-      color: "#333",
-      paddingHorizontal: 10,
+        height: 50,
+        color: "#333",
+        paddingHorizontal: 10,
     },
     buttonTextrt: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+        color: "#fff",
+        fontWeight: "bold",
+    },
 });

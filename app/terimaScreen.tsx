@@ -29,7 +29,7 @@ export default function terimaScreen() {
   const [peritem, setPeritem] = useState(false);
 
   const [ketTerima, setKetTerima] = useState("");
-  const [optionfilter, setoptionfilter] = useState("Nomor PO");
+  const [optionfilter, setoptionfilter] = useState("Nomor Invoice");
   const [optionfiltertanggal, setoptionfiltertanggal] = useState("Semua");
   const [optionbulan, setOptionBulan] = useState("Bulan");
   const [optionTahun, setOptionTahun] = useState("Tahun");
@@ -40,6 +40,41 @@ export default function terimaScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [lastStatusReq, setLastStatusReq] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const [isDatePickerVisibleSampai, setDatePickerVisibilitySampai] =
+    useState(false);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const showDatePickerDari = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePickerDari = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    setSelectedDate(date);
+    hideDatePickerDari();
+  };
+
+  const showDatePickerSampai = () => {
+    setDatePickerVisibilitySampai(true);
+  };
+
+  const hideDatePickerSampai = () => {
+    setDatePickerVisibilitySampai(false);
+  };
+
+  const handleConfirmSampai = (date) => {
+    setSelectedDateSampai(date);
+    hideDatePickerSampai();
+  };
+
+  const handlePressTerimaBarang = (itemId) => {
+    router.navigate({ pathname: "detailTerimaBarang", params: { id: itemId } });
+  };
 
   let limitPage = 0;
   let nextPageAct = 0;
@@ -79,37 +114,34 @@ export default function terimaScreen() {
       response.map((item, i) => {
         let total = 0;
         total = parseFloat(item.Qtty) * parseFloat(item.Harga);
-        
-
-
         let jumlahgrandvaldiskon = 0;
-            let jumlahgrandvalppn = 0;
-            let diskonGrand= parseFloat(item.Disc);
-            let ppngrand= parseFloat(item.PPn);
-            let nominaldiskongrand= parseFloat(item.NominalDisc);
-            let nominalppngrand= parseFloat(item.NominalPPn);
-            if (isNaN(item.Disc) || item.Disc==null || item.Disc=="") {
-                diskonGrand=0;
-            }
+        let jumlahgrandvalppn = 0;
+        let diskonGrand = parseFloat(item.Disc);
+        let ppngrand = parseFloat(item.PPn);
+        let nominaldiskongrand = parseFloat(item.NominalDisc);
+        let nominalppngrand = parseFloat(item.NominalPPn);
+        if (isNaN(item.Disc) || item.Disc == null || item.Disc == "") {
+          diskonGrand = 0;
+        }
 
-            if (isNaN(item.PPn) || item.PPn==null || item.PPn=="") {
-                ppngrand=0
-            }
+        if (isNaN(item.PPn) || item.PPn == null || item.PPn == "") {
+          ppngrand = 0
+        }
 
-            if (isNaN(item.NominalDisc) || item.NominalDisc==null || item.NominalDisc=="") {
-                nominalppngrand=0;
-            }
+        if (isNaN(item.NominalDisc) || item.NominalDisc == null || item.NominalDisc == "") {
+          nominalppngrand = 0;
+        }
 
-            if (isNaN(item.NominalDisc) || item.NominalDisc==null || item.NominalDisc=="") {
-                nominaldiskongrand=0;
-            }
+        if (isNaN(item.NominalDisc) || item.NominalDisc == null || item.NominalDisc == "") {
+          nominaldiskongrand = 0;
+        }
 
-            jumlahgrandvaldiskon = total - (total * diskonGrand) / 100;
-            jumlahgrandvalppn =
-                jumlahgrandvaldiskon + (jumlahgrandvaldiskon * ppngrand) / 100;
+        jumlahgrandvaldiskon = total - (total * diskonGrand) / 100;
+        jumlahgrandvalppn =
+          jumlahgrandvaldiskon + (jumlahgrandvaldiskon * ppngrand) / 100;
 
-            jumlahgrandvalppn =
-                jumlahgrandvalppn + nominalppngrand - nominaldiskongrand;
+        jumlahgrandvalppn =
+          jumlahgrandvalppn + nominalppngrand - nominaldiskongrand;
 
 
 
@@ -122,9 +154,9 @@ export default function terimaScreen() {
           nopo: item.NoPo,
           namaproduk: item.namaProduct,
           qtty: item.Qtty,
-          harga:item.Harga,
+          harga: item.Harga,
           disc: item.Disc,
-          ppn:item.PPn,
+          ppn: item.PPn,
           gudang: item.Gudang,
           total: jumlahgrandvalppn,
         });
@@ -248,6 +280,46 @@ export default function terimaScreen() {
     }
   };
 
+  const resetAndFetch = (statusReq: string) => {
+    let tanggaldari = "2025-07-07";
+    let tanggalsampai = "2025-07-07";
+
+    if (optionfiltertanggal === "Tanggal") {
+      tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
+      tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
+    }
+    if (statusReq === "perItem") {
+      fetchData(
+        ketTerima,
+        nextPageAct,
+        30,
+        optionfilter,
+        optionfiltertanggal,
+        tanggaldari,
+        tanggalsampai,
+        optionbulan,
+        optionTahun,
+        "filter",
+        "perItem"
+      );
+    } else {
+      fetchData(
+        ketTerima,
+        nextPageAct,
+        30,
+        optionfilter,
+        optionfiltertanggal,
+        tanggaldari,
+        tanggalsampai,
+        optionbulan,
+        optionTahun,
+        "filter",
+        ""
+      );
+    }
+
+  };
+
   const onRefresh = useCallback((statusReq: string) => {
     setRefreshing(true);
     if (statusReq == "perItem") {
@@ -344,7 +416,7 @@ export default function terimaScreen() {
           borderRadius: 15,
           backgroundColor: "#fff",
         }}
-        onPress={() => console.log(item.noinv)}
+        onPress={() => handlePressTerimaBarang(item.noinv)}
       >
         <View>
           <View
@@ -458,7 +530,7 @@ export default function terimaScreen() {
             <Text style={{ color: "#585858", fontSize: 12 }}>
               {"Qtty : " +
                 item.qtty +
-                " | Hrga : "+ item.harga +
+                " | Hrga : " + item.harga +
                 " | Disc : " +
                 item.disc +
                 " | PPN : " +
@@ -496,7 +568,7 @@ export default function terimaScreen() {
             borderRadius: 5,
             marginRight: 8,
           }}
-          onPress={() => console.log(true)}
+          onPress={() => setModalVisible(true)}
         >
           <MaterialCommunityIcons
             name="filter-variant"
@@ -513,7 +585,7 @@ export default function terimaScreen() {
             borderRadius: 5,
             marginRight: 8,
           }}
-          onPress={() => console.log(true)}
+          onPress={() => setModalVisible(true)}
         >
           <MaterialCommunityIcons name="printer" size={26} color="#fff" />
         </TouchableOpacity>
@@ -537,8 +609,8 @@ export default function terimaScreen() {
         >
           <Text style={{ color: peritem ? "#fff" : "#000" }}>
             Lihat  {peritem == false
-                ? "PerItem"
-                : "PerInvoice"}
+              ? "PerItem"
+              : "PerInvoice"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -564,9 +636,275 @@ export default function terimaScreen() {
               colors={["#9Bd35A", "#689F38"]}
             />
           }
-          style={{ marginBottom: 20 }}
+          style={{ marginBottom: 120 }}
         />
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View style={styles.modalOverlay} />
+        </TouchableWithoutFeedback>
+
+        <View style={styles.bottomModal}>
+          <View>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={optionfiltertanggal}
+                style={styles.picker}
+                onValueChange={(itemValue) => setoptionfiltertanggal(itemValue)}
+              >
+                <Picker.Item label="Semua" value="Semua" />
+                <Picker.Item label="Tanggal" value="Tanggal" />
+                <Picker.Item label="Bulan" value="Bulan" />
+                <Picker.Item label="Tahun" value="Tahun" />
+              </Picker>
+            </View>
+
+            {/* by tgl */}
+            {optionfiltertanggal == "Tanggal" || optionfiltertanggal == "" ? (
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginTop: 10,
+                }}
+              >
+                <View style={{ flex: 1, marginRight: 5 }}>
+                  <Text style={{ fontSize: 17, marginBottom: 5 }}>
+                    Tanggal Dari
+                  </Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.pickerContainer,
+                      {
+                        height: 50,
+                        display: "flex",
+                        justifyContent: "center",
+                        paddingHorizontal: 10,
+                      },
+                    ]}
+                    onPress={showDatePickerDari}
+                  >
+                    <Text style={{ fontSize: 17 }}>
+                      {selectedDate
+                        ? selectedDate.toLocaleDateString()
+                        : "Pilih tanggal"}
+                    </Text>
+                  </TouchableOpacity>
+                  <DateTimePickerModal
+                    isVisible={isDatePickerVisible}
+                    mode="date"
+                    onConfirm={handleConfirm}
+                    onCancel={hideDatePickerDari}
+                  />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 17, marginBottom: 5 }}>
+                    Tanggal Sampai
+                  </Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.pickerContainer,
+                      {
+                        height: 50,
+                        display: "flex",
+                        justifyContent: "center",
+                        paddingHorizontal: 10,
+                      },
+                    ]}
+                    onPress={showDatePickerSampai}
+                  >
+                    <Text style={{ fontSize: 17 }}>
+                      {selectedDateSampai
+                        ? selectedDateSampai.toLocaleDateString()
+                        : "Pilih tanggal"}
+                    </Text>
+                  </TouchableOpacity>
+                  <DateTimePickerModal
+                    isVisible={isDatePickerVisibleSampai}
+                    mode="date"
+                    onConfirm={handleConfirmSampai}
+                    onCancel={hideDatePickerSampai}
+                  />
+                </View>
+              </View>
+            ) : optionfiltertanggal == "Bulan" ? (
+              <View>
+                <View style={{ marginTop: 10 }}>
+                  <Text style={{ fontSize: 17, marginBottom: 5 }}>Bulan</Text>
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={optionbulan}
+                      style={styles.picker}
+                      onValueChange={(itemValue) => setOptionBulan(itemValue)}
+                    >
+                      <Picker.Item label="Pilih Bulan" value="Pilih Bulan" />
+                      <Picker.Item label="01" value="01" />
+                      <Picker.Item label="02" value="02" />
+                      <Picker.Item label="03" value="03" />
+                      <Picker.Item label="04" value="04" />
+                      <Picker.Item label="05" value="05" />
+                      <Picker.Item label="06" value="06" />
+                      <Picker.Item label="07" value="07" />
+                      <Picker.Item label="08" value="08" />
+                      <Picker.Item label="09" value="09" />
+                      <Picker.Item label="10" value="10" />
+                      <Picker.Item label="11" value="11" />
+                      <Picker.Item label="12" value="12" />
+                    </Picker>
+                  </View>
+                </View>
+
+                <View style={{ marginTop: 10 }}>
+                  <Text style={{ fontSize: 17, marginBottom: 5 }}>Tahun</Text>
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={optionTahun}
+                      style={styles.picker}
+                      onValueChange={(itemValue) => setOptionTahun(itemValue)}
+                    >
+                      <Picker.Item label="Pilih Tahun" value="Pilih Tahun" />
+                      {Array.from({ length: 20 }).map((_, i) => {
+                        const year = new Date().getFullYear() - i;
+                        return (
+                          <Picker.Item
+                            key={year}
+                            label={year.toString()}
+                            value={year.toString()}
+                          />
+                        );
+                      })}
+                    </Picker>
+                  </View>
+                </View>
+              </View>
+            ) : optionfiltertanggal == "Tahun" ? (
+              <View style={{ marginTop: 10 }}>
+                <Text style={{ fontSize: 17, marginBottom: 5 }}>Tahun</Text>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={optionTahun}
+                    style={styles.picker}
+                    onValueChange={(itemValue) => { setOptionTahun(itemValue) }
+                    }
+                  >
+                    <Picker.Item key="xnxx" label="Pilih Tahun" value="Pilih Tahun" />
+                    {Array.from({ length: 20 }).map((_, i) => {
+                      const year = new Date().getFullYear() - i;
+                      return (
+                        <Picker.Item
+                          key={year}
+                          label={year.toString()}
+                          value={year.toString()}
+                        />
+                      );
+                    })}
+                  </Picker>
+                </View>
+              </View>
+            ) : (
+              ""
+            )}
+
+            <View style={{ marginTop: 10 }}>
+              <Text style={{ fontSize: 17, marginBottom: 5 }}>Berdasarkan</Text>
+
+              {
+                  peritem == false ? (
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={optionfilter}
+                        style={styles.picker}
+                        onValueChange={(itemValue) => setoptionfilter(itemValue)}
+                      >
+
+                        <Picker.Item label="Nomor Invoice" value="Nomor Invoice" />
+                        <Picker.Item label="Nama Supplier" value="Nama Supplier" />
+                        <Picker.Item label="Gudang" value="Gudang" />
+
+                      </Picker>
+                    </View>
+                  ):(
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={optionfilter}
+                        style={styles.picker}
+                        onValueChange={(itemValue) => setoptionfilter(itemValue)}
+                      >
+                        <Picker.Item label="Nomor Invoice" value="Nomor Invoice" />
+                        <Picker.Item label="Kode Supplier" value="Kode Supplier" />
+                        <Picker.Item label="Nama Supplier" value="Nama Supplier" />
+                        <Picker.Item label="Gudang" value="Gudang" />
+                        <Picker.Item label="Kode Barang" value="Kode Barang" />
+                        <Picker.Item label="Nama Barang" value="Nama Barang" />
+
+                      </Picker>
+                    </View>
+                  )
+              }
+              
+
+              <View style={[styles.pickerContainer, { marginTop: 5 }]}>
+                <TextInput
+                  style={{ fontSize: 17, paddingHorizontal: 10 }}
+                  placeholder={"Cari by " + optionfilter}
+                  value={ketTerima}
+                  onChangeText={setKetTerima}
+                />
+              </View>
+            </View>
+
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <TouchableOpacity
+                onPress={() => {
+                  peritem == false ? resetAndFetch("") : resetAndFetch("perItem");
+
+                }}
+                style={{
+                  flex: 1,
+                  marginRight: 5,
+                  height: 50,
+                  backgroundColor: "#0085c8",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  paddingHorizontal: 20,
+                  borderRadius: 10,
+                  marginTop: 15,
+                }}
+              >
+                <Text style={[styles.buttonTextrt, { fontSize: 17 }]}>
+                  Proses
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={{
+                  flex: 1,
+                  height: 50,
+                  backgroundColor: "#c80035",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  paddingHorizontal: 20,
+                  borderRadius: 10,
+                  marginTop: 15,
+                }}
+              >
+                <Text style={[styles.buttonTextrt, { fontSize: 17 }]}>
+                  Tutup
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

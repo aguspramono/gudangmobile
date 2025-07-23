@@ -31,7 +31,13 @@ function Layout() {
       <Stack.Screen name="orderScreen" options={{ headerShown: false }} />
       <Stack.Screen name="detailOrderBarang" options={{ headerShown: false }} />
       <Stack.Screen name="terimaScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="detailTerimaBarang" options={{ headerShown: false }} />
+      <Stack.Screen name="keluarScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="detailKeluarBarang" options={{ headerShown: false }} />
+      <Stack.Screen name="mutasiScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="detailMutasiBarang" options={{ headerShown: false }} />
       <Stack.Screen name="profileScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="menuScreen" options={{ headerShown: false }} />
 
     </Stack>
   );

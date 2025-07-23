@@ -1,29 +1,32 @@
+import React, { useEffect, useState, useCallback } from "react";
+import { RefreshControl, ActivityIndicator, Platform } from "react-native";
 import {
     View,
     Text,
     StyleSheet,
-    TouchableOpacity,
     FlatList,
-    ActivityIndicator,
-    RefreshControl,
+    StatusBar,
+    TextInput,
     Modal,
+    TouchableOpacity,
+    ScrollView,
     TouchableWithoutFeedback,
-    Platform,
-    TextInput
+    Button,
 } from "react-native";
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { getAllOrderRequest } from "./../func/orderFunc";
-import { DateFormat } from "./../func/global/globalFunc";
+import {
+    getAllKeluarRequest
+} from "./../func/keluarFunc";
+import { router, useFocusEffect } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { router, useFocusEffect } from "expo-router";
+import { DateFormat } from "./../func/global/globalFunc";
 
-function orderScreen() {
-    const [orderbarang, setOrderBarang] = useState<any[]>([]);
+function keluarScreen() {
+    const [keluarbarang, setKeluarBarang] = useState<any[]>([]);
     const [page, setPage] = useState(0);
-    const [ketorder, setKetOrder] = useState("");
-    const [optionfilter, setoptionfilter] = useState("Nomor PO");
+    const [ketkeluar, setKetKeluar] = useState("");
+    const [optionfilter, setoptionfilter] = useState("Nomor Invoice");
     const [optionfiltertanggal, setoptionfiltertanggal] = useState("Semua");
     const [optionbulan, setOptionBulan] = useState("Bulan");
     const [optionTahun, setOptionTahun] = useState("Tahun");
@@ -37,7 +40,7 @@ function orderScreen() {
     const [isDatePickerVisibleSampai, setDatePickerVisibilitySampai] =
         useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    
+
     const showDatePickerDari = () => {
         setDatePickerVisibility(true);
     };
@@ -64,8 +67,8 @@ function orderScreen() {
         hideDatePickerSampai();
     };
 
-    const handlePressOrderBarang = (itemId) => {
-      router.navigate({ pathname: "detailOrderBarang", params: { id: itemId } });
+    const handlePressKeluarBarang = (itemId) => {
+        router.navigate({ pathname: "detailKeluarBarang", params: { id: itemId } });
     };
 
     const fetchData = async (
@@ -80,8 +83,8 @@ function orderScreen() {
         tahun: string,
         setReq: string
     ) => {
-        const orderbarangitem = [];
-        const response = await getAllOrderRequest(
+        const keluarbarangitem = [];
+        const response = await getAllKeluarRequest(
             like,
             limitqueryprev,
             limitquery,
@@ -94,18 +97,18 @@ function orderScreen() {
         );
 
         response.map((item, i) =>
-            orderbarangitem.push({
-                id: item.NomorPO + page + i,
-                nopo: item.NomorPO,
-                detail: item.Qtty + " item order barang",
+            keluarbarangitem.push({
+                id: item.InvNum + page + i,
+                inv: item.InvNum,
+                detail: item.Qtty + " item keluar barang",
                 tanggal: item.Tanggal
             })
         );
 
         if (setReq === "filter") {
-            setOrderBarang(orderbarangitem);
+            setKeluarBarang(keluarbarangitem);
         } else {
-            setOrderBarang([...orderbarang, ...orderbarangitem]);
+            setKeluarBarang([...keluarbarang, ...keluarbarangitem]);
         }
     };
 
@@ -121,7 +124,7 @@ function orderScreen() {
             tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
-        const response = await getAllOrderRequest(ketorder, 0, 0, optionfilter, optionfiltertanggal, tanggaldari, tanggalsampai, optionbulan, optionTahun);
+        const response = await getAllKeluarRequest(ketkeluar, 0, 0, optionfilter, optionfiltertanggal, tanggaldari, tanggalsampai, optionbulan, optionTahun);
         limitPage = Math.ceil(response.length / 10);
 
         if (page >= limitPage) {
@@ -139,7 +142,7 @@ function orderScreen() {
         }
 
         fetchData(
-            ketorder,
+            ketkeluar,
             nextPageAct,
             30,
             optionfilter,
@@ -161,7 +164,7 @@ function orderScreen() {
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
         fetchData(
-            ketorder,
+            ketkeluar,
             nextPageAct,
             30,
             optionfilter,
@@ -177,7 +180,7 @@ function orderScreen() {
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         fetchData(
-            ketorder,
+            ketkeluar,
             0,
             30,
             optionfilter,
@@ -193,9 +196,10 @@ function orderScreen() {
         }, 2000);
     }, []);
 
+
     useEffect(() => {
         fetchData(
-            ketorder,
+            ketkeluar,
             0,
             30,
             optionfilter,
@@ -208,8 +212,7 @@ function orderScreen() {
         );
     }, []);
 
-
-    const renderOrderBarang = ({ item }) => {
+    const renderKeluarBarang = ({ item }) => {
         return (
             <TouchableOpacity
                 style={{
@@ -219,7 +222,7 @@ function orderScreen() {
                     borderRadius: 15,
                     backgroundColor: "#fff",
                 }}
-                onPress={() => handlePressOrderBarang(item.nopo)}
+                onPress={() => handlePressKeluarBarang(item.inv)}
             >
                 <View>
                     <View
@@ -230,7 +233,7 @@ function orderScreen() {
                         }}
                     >
                         <Text style={{ fontWeight: "bold", color: "#585858" }}>
-                            {item.nopo}
+                            {item.inv}
                         </Text>
                         <Text style={{ color: "#585858", fontSize: 12 }}>
                             {item.tanggal}
@@ -263,7 +266,7 @@ function orderScreen() {
                     marginTop: 15,
                 }}
             >
-                Order Barang
+                Keluar Barang
             </Text>
 
             <View style={styles.containerfilter}>
@@ -304,8 +307,8 @@ function orderScreen() {
 
             <View>
                 <FlatList
-                    data={orderbarang}
-                    renderItem={renderOrderBarang}
+                    data={keluarbarang}
+                    renderItem={renderKeluarBarang}
                     keyExtractor={(item) => item.id}
                     onEndReached={() => {
                         nextPage();
@@ -474,7 +477,7 @@ function orderScreen() {
                                     <Picker
                                         selectedValue={optionTahun}
                                         style={styles.picker}
-                                        onValueChange={(itemValue) =>{setOptionTahun(itemValue)}
+                                        onValueChange={(itemValue) => { setOptionTahun(itemValue) }
                                         }
                                     >
                                         <Picker.Item key="xnxx" label="Pilih Tahun" value="Pilih Tahun" />
@@ -503,9 +506,10 @@ function orderScreen() {
                                     style={styles.picker}
                                     onValueChange={(itemValue) => setoptionfilter(itemValue)}
                                 >
-                                    <Picker.Item label="Nomor PO" value="Nomor PO" />
-                                    <Picker.Item label="Nama Supplier" value="Nama Supplier" />
+                                    <Picker.Item label="Nomor Invoice" value="Nomor Invoice" />
                                     <Picker.Item label="Departemen" value="Departemen" />
+                                    <Picker.Item label="Dari Gudang" value="Dari Gudang" />
+                                    <Picker.Item label="Ke Gudang" value="Ke Gudang" />
                                 </Picker>
                             </View>
 
@@ -513,8 +517,8 @@ function orderScreen() {
                                 <TextInput
                                     style={{ fontSize: 17, paddingHorizontal: 10 }}
                                     placeholder={"Cari by " + optionfilter}
-                                    value={ketorder}
-                                    onChangeText={setKetOrder}
+                                    value={ketkeluar}
+                                    onChangeText={setKetKeluar}
                                 />
                             </View>
                         </View>
@@ -565,9 +569,10 @@ function orderScreen() {
             </Modal>
         </View>
     );
+
 }
 
-export default orderScreen;
+export default keluarScreen;
 
 const styles = StyleSheet.create({
     container: {
@@ -589,52 +594,52 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
     },
-      modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-  bottomModal: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  modalText: {
-    fontSize: 16,
-    marginTop: 10,
-  },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.4)",
+    },
+    bottomModal: {
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+        backgroundColor: "#fff",
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+    },
+    modalText: {
+        fontSize: 16,
+        marginTop: 10,
+    },
     pickerContainer: {
-      borderRadius: 12,
-      backgroundColor: "#fff",
-      ...Platform.select({
-        android: {
-          borderWidth: 1,
-          borderColor: "#ccc",
-        },
-        ios: {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-        },
-      }),
-      overflow: "hidden",
+        borderRadius: 12,
+        backgroundColor: "#fff",
+        ...Platform.select({
+            android: {
+                borderWidth: 1,
+                borderColor: "#ccc",
+            },
+            ios: {
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+            },
+        }),
+        overflow: "hidden",
     },
     picker: {
-      height: 50,
-      color: "#333",
-      paddingHorizontal: 10,
+        height: 50,
+        color: "#333",
+        paddingHorizontal: 10,
     },
     buttonTextrt: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+        color: "#fff",
+        fontWeight: "bold",
+    },
 });

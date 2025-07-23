@@ -5,7 +5,6 @@ const headers = {
     "Content-Type": "multipart/form-data",
 };
 
-
 export const getAllTerimaRequest = async (wherelike: string, pageprev: number, page: number, option: string, filter: string, tanggaldari: string, tanggalsampai: string, bulan: string, tahun: string) => {
     try {
         const response = await axios.get(
@@ -31,3 +30,40 @@ export const getAllTerimaPerItemRequest = async (wherelike: string, pageprev: nu
         throw error;
     }
 };
+
+
+export const getAllTerimaRequestbyId = async (wherelike:string) => {
+    try {
+      const response = await axios.get(
+        `${baseUrl}stockpurch/detail?id=${wherelike}`,{
+          headers:headers
+        }
+      );
+  
+      return response.data.dataStockPurch;
+    } catch (error) {
+        console.error("Error terima request:", error);
+        throw error;
+    }
+};
+
+export const getAllTerimaDetailRequestbyId = async (wherelike:string) => {
+    try {
+        const response = await axios.get(
+            `${baseUrl}stockpurchdetail/detail?id=${wherelike}`,{
+            headers:headers
+            }
+        );
+  
+        return response.data.dataStockPurchDetail;
+    } catch (error) {
+        console.error("Error terima request:", error);
+        throw error;
+    }
+};
+
+export const printPesananRequest = async (kode:string) => {
+ 
+  return `${baseUrl}stockpurch/printlaporanbyid?nomorinv=${kode}`;
+   
+}
