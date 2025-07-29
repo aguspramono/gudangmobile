@@ -66,6 +66,8 @@ export default function HomeScreen() {
             router.navigate({ pathname: "keluarScreen" });
         }else if (itemId == "4") {
             router.navigate({ pathname: "mutasiScreen" });
+        }else if (itemId == "5") {
+            router.navigate({ pathname: "closingPesananScreen" });
         }
         Animated.sequence([
             Animated.timing(scaleAnim, { toValue: 1.1, duration: 100, useNativeDriver: true }),

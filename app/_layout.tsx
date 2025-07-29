@@ -36,6 +36,8 @@ function Layout() {
       <Stack.Screen name="detailKeluarBarang" options={{ headerShown: false }} />
       <Stack.Screen name="mutasiScreen" options={{ headerShown: false }} />
       <Stack.Screen name="detailMutasiBarang" options={{ headerShown: false }} />
+      <Stack.Screen name="closingPesananScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="detailClosingPesanan" options={{ headerShown: false }} />
       <Stack.Screen name="profileScreen" options={{ headerShown: false }} />
       <Stack.Screen name="menuScreen" options={{ headerShown: false }} />
 
