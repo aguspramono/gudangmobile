@@ -94,7 +94,7 @@ export default function terimaScreen() {
   ) => {
     const terimabarangitem = [];
 
-    if (statusReq !== lastStatusReq) {
+     if (statusReq !== lastStatusReq) {
       setTerimaBarang([]);
     }
 
@@ -482,6 +482,9 @@ export default function terimaScreen() {
                 flexDirection: "row",
                 justifyContent: "space-between",
                 marginTop: 5,
+                borderBottomWidth: 0.3,
+                paddingVertical: 5,
+                borderStyle: "dashed"
               }}
             >
               <Text>Supplier : </Text>
@@ -494,6 +497,9 @@ export default function terimaScreen() {
                 flexDirection: "row",
                 justifyContent: "space-between",
                 marginTop: 5,
+                borderBottomWidth: 0.3,
+                paddingVertical: 5,
+                borderStyle: "dashed"
               }}
             >
               <Text>No. PO : </Text>
@@ -506,6 +512,9 @@ export default function terimaScreen() {
                 flexDirection: "row",
                 justifyContent: "space-between",
                 marginTop: 5,
+                borderBottomWidth: 0.3,
+                paddingVertical: 5,
+                borderStyle: "dashed"
               }}
             >
               <Text>Produk : </Text>
@@ -625,7 +634,7 @@ export default function terimaScreen() {
           onEndReached={() => {
             peritem == false ? nextPage("") : nextPage("perItem");
           }}
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={0.3}
           ListFooterComponent={loading && <ActivityIndicator size="large" />}
           refreshControl={
             <RefreshControl

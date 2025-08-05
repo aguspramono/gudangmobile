@@ -16,6 +16,18 @@ export const getAllOrderRequest = async (wherelike:string,pageprev:number,page:n
   }
 };
 
+export const getAllOrderItemRequest = async (wherelike:string,pageprev:number,page:number,option:string,filter:string,tanggaldari:string,tanggalsampai:string,bulan:string,tahun:string) => {
+  try {
+    const response = await axios.get(`${baseUrl}stockpo/dataallitem?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`,{ headers });
+    //console.log(`${baseUrl}stockpo/dataallitem?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`);
+    return response.data.dataStockOrderItem;
+  } catch (error) {
+    //console.log(`${baseUrl}stockpo/dataallitem?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`);
+    console.error("Error pesanan request:", error);
+    throw error;
+  }
+};
+
 export const getOrderRequestByID = async(nopo:string) =>{
   try {
     const response = await axios.get(
@@ -48,7 +60,12 @@ export const getOrderDetailRequestByID = async(nopo:string) =>{
 }
 
 export const printPesananRequest = async (kode:string) => {
- 
-  return `${baseUrl}stockpo/printlaporanbyid?nomorinv=${kode}`;
-   
+  return `${baseUrl}stockpo/printlaporanbyid?nomorinv=${kode}`; 
 }
+
+export const printAllRequest = async (wherelike:string,pageprev:number,page:number,option:string,filter:string,tanggaldari:string,tanggalsampai:string,bulan:string,tahun:string,pilihan:string) => {
+  //console.log(`${baseUrl}stockpo/printlaporan??like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}&pilihan=${pilihan}`);
+  return `${baseUrl}stockpo/printlaporan??like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}&pilihan=${pilihan}`;
+}
+
+

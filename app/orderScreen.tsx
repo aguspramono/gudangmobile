@@ -13,11 +13,14 @@ import {
 } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { getAllOrderRequest } from "./../func/orderFunc";
+import { getAllOrderRequest, getAllOrderItemRequest, printAllRequest } from "./../func/orderFunc";
 import { DateFormat } from "./../func/global/globalFunc";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { router, useFocusEffect } from "expo-router";
+import CustomAlert from './../component/sweetalert';
+import { WebView } from 'react-native-webview';
+import { RadioButton } from 'react-native-paper';
 
 function orderScreen() {
     const [orderbarang, setOrderBarang] = useState<any[]>([]);
@@ -27,6 +30,7 @@ function orderScreen() {
     const [optionfiltertanggal, setoptionfiltertanggal] = useState("Semua");
     const [optionbulan, setOptionBulan] = useState("Bulan");
     const [optionTahun, setOptionTahun] = useState("Tahun");
+    const [pilihan, setPilihan] = useState("belum");
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDateSampai, setSelectedDateSampai] = useState(null);
     const [limitQuery, setLimitQuery] = useState(0);
@@ -37,7 +41,12 @@ function orderScreen() {
     const [isDatePickerVisibleSampai, setDatePickerVisibilitySampai] =
         useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    
+    const [peritem, setPeritem] = useState(false);
+    const [lastStatusReq, setLastStatusReq] = useState("");
+    const [statusprint, setStatusPrint] = useState("");
+    const [pdfUri, setPdfUri] = useState(null);
+    const [showAlertInfoDownload, setShowAlertInfoDownload] = useState(false);
+
     const showDatePickerDari = () => {
         setDatePickerVisibility(true);
     };
@@ -65,7 +74,39 @@ function orderScreen() {
     };
 
     const handlePressOrderBarang = (itemId) => {
-      router.navigate({ pathname: "detailOrderBarang", params: { id: itemId } });
+        router.navigate({ pathname: "detailOrderBarang", params: { id: itemId } });
+    };
+
+    const handleDataPerItem = (status: string) => {
+        if (status == "perItem") {
+            fetchData(
+                "",
+                0,
+                30,
+                "Nomor PO",
+                "Semua",
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                "",
+                "",
+            );
+        } else {
+            fetchData(
+                "",
+                0,
+                30,
+                "Nomor PO",
+                "Semua",
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                "",
+                "perItem"
+            );
+        }
     };
 
     const fetchData = async (
@@ -78,41 +119,80 @@ function orderScreen() {
         tanggalsampai: string,
         bulan: string,
         tahun: string,
-        setReq: string
+        setReq: string,
+        statusReq: string
     ) => {
         const orderbarangitem = [];
-        const response = await getAllOrderRequest(
-            like,
-            limitqueryprev,
-            limitquery,
-            option,
-            filter,
-            tanggaldari,
-            tanggalsampai,
-            bulan,
-            tahun
-        );
+        if (statusReq !== lastStatusReq) {
+            setOrderBarang([]);
+        }
 
-        response.map((item, i) =>
-            orderbarangitem.push({
-                id: item.NomorPO + page + i,
-                nopo: item.NomorPO,
-                detail: item.Qtty + " item order barang",
-                tanggal: item.Tanggal
-            })
-        );
+        if (statusReq === "perItem") {
 
-        if (setReq === "filter") {
+            const response = await getAllOrderItemRequest(
+                like,
+                limitqueryprev,
+                limitquery,
+                option,
+                filter,
+                tanggaldari,
+                tanggalsampai,
+                bulan,
+                tahun
+            );
+
+            response.map((item, i) =>
+                orderbarangitem.push({
+                    id: item.NoPo + page + i + "peritem",
+                    nomorpesanan: item.NoPesanan,
+                    tanggal: item.Tanggal,
+                    nopo: item.NoPo,
+                    departemen: item.Departemen,
+                    supplier: item.Supplier,
+                    tglclosing: item.TglClosing,
+                    nama: item.Nama,
+                    qtypo: item.QtyPO,
+                    qtybeli: item.QtyBeli,
+                })
+            );
+        } else {
+
+            const response = await getAllOrderRequest(
+                like,
+                limitqueryprev,
+                limitquery,
+                option,
+                filter,
+                tanggaldari,
+                tanggalsampai,
+                bulan,
+                tahun
+            );
+
+            response.map((item, i) =>
+                orderbarangitem.push({
+                    id: item.NomorPO + page + i + "noitem",
+                    nopo: item.NomorPO,
+                    detail: item.Qtty + " item order barang",
+                    tanggal: item.Tanggal
+                })
+            );
+
+        }
+
+        if (setReq === "filter" || statusReq !== lastStatusReq) {
             setOrderBarang(orderbarangitem);
         } else {
             setOrderBarang([...orderbarang, ...orderbarangitem]);
         }
+
+        setLastStatusReq(statusReq);
     };
 
     let limitPage = 0;
     let nextPageAct = 0;
 
-    const nextPage = async () => {
+    const nextPage = async (statusReq: string) => {
 
         let tanggaldari = "2025-07-07";
         let tanggalsampai = "2025-07-07";
@@ -121,8 +201,36 @@ function orderScreen() {
             tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
-        const response = await getAllOrderRequest(ketorder, 0, 0, optionfilter, optionfiltertanggal, tanggaldari, tanggalsampai, optionbulan, optionTahun);
-        limitPage = Math.ceil(response.length / 10);
+        let jumlahdataresponse = 0;
+
+        if (statusReq == "perItem") {
+            const response = await getAllOrderItemRequest(
+                ketorder,
+                0,
+                0,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun
+            );
+            jumlahdataresponse = response.length;
+        } else {
+            const response = await getAllOrderRequest(
+                ketorder,
+                0,
+                0,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun);
+            jumlahdataresponse = response.length;
+        }
+        //const response = await getAllOrderRequest(ketorder, 0, 0, optionfilter, optionfiltertanggal, tanggaldari, tanggalsampai, optionbulan, optionTahun);
+        limitPage = Math.ceil(jumlahdataresponse / 10);
 
         if (page >= limitPage) {
             setPage(limitPage);
@@ -133,26 +241,48 @@ function orderScreen() {
         nextPageAct = limitQuery + 30;
         setLimitQuery(nextPageAct);
 
-        if (nextPageAct >= response.length) {
-            nextPageAct = response.length;
+        if (nextPageAct >= jumlahdataresponse) {
+            nextPageAct = jumlahdataresponse;
             setLimitQuery(nextPageAct);
         }
 
-        fetchData(
-            ketorder,
-            nextPageAct,
-            30,
-            optionfilter,
-            optionfiltertanggal,
-            tanggaldari,
-            tanggalsampai,
-            optionbulan,
-            optionTahun,
-            ""
-        );
+        if (statusReq == "perItem") {
+            fetchData(
+                ketorder,
+                nextPageAct,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                "",
+                "perItem"
+            );
+
+        } else {
+
+            fetchData(
+                ketorder,
+                nextPageAct,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                "",
+                ""
+            );
+
+        }
+
+
     };
 
-    const resetAndFetch = () => {
+    const resetAndFetch = async (statusReq: string) => {
         let tanggaldari = "2025-07-07";
         let tanggalsampai = "2025-07-07";
 
@@ -160,34 +290,92 @@ function orderScreen() {
             tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
-        fetchData(
-            ketorder,
-            nextPageAct,
-            30,
-            optionfilter,
-            optionfiltertanggal,
-            tanggaldari,
-            tanggalsampai,
-            optionbulan,
-            optionTahun,
-            "filter"
-        );
+        if (statusprint === "") {
+            if (statusReq === "perItem") {
+
+                fetchData(
+                    ketorder,
+                    nextPageAct,
+                    30,
+                    optionfilter,
+                    optionfiltertanggal,
+                    tanggaldari,
+                    tanggalsampai,
+                    optionbulan,
+                    optionTahun,
+                    "filter",
+                    "perItem"
+                );
+
+            } else {
+
+                fetchData(
+                    ketorder,
+                    nextPageAct,
+                    30,
+                    optionfilter,
+                    optionfiltertanggal,
+                    tanggaldari,
+                    tanggalsampai,
+                    optionbulan,
+                    optionTahun,
+                    "filter",
+                    ""
+                );
+
+            }
+        } else {
+            const url = await printAllRequest(
+                ketorder,
+                0,
+                0,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                pilihan
+            );
+            setPdfUri(url);
+            setShowAlertInfoDownload(true)
+        }
+
+
     };
 
-    const onRefresh = useCallback(() => {
+    const onRefresh = useCallback((statusReq: string) => {
         setRefreshing(true);
-        fetchData(
-            ketorder,
-            0,
-            30,
-            optionfilter,
-            optionfiltertanggal,
-            "2025-01-01",
-            "2025-12-31",
-            optionbulan,
-            optionTahun,
-            '',
-        );
+        if (statusReq == "perItem") {
+            fetchData(
+                ketorder,
+                0,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                '',
+                'perItem'
+            );
+        } else {
+            fetchData(
+                ketorder,
+                0,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                '',
+                ''
+            );
+        }
+
         setTimeout(() => {
             setRefreshing(false);
         }, 2000);
@@ -205,6 +393,7 @@ function orderScreen() {
             optionbulan,
             optionTahun,
             '',
+            ''
         );
     }, []);
 
@@ -251,6 +440,134 @@ function orderScreen() {
         );
     };
 
+    const renderOrderBarangItem = ({ item }) => {
+        return (
+            <TouchableOpacity
+                style={{
+                    marginTop: 8,
+                    paddingVertical: 10,
+                    paddingHorizontal: 15,
+                    borderRadius: 15,
+                    backgroundColor: "#fff",
+                }}
+                onPress={() => console.log(item.noinv)}
+            >
+                <View>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
+                    >
+                        <Text style={{ fontWeight: "bold", color: "#585858" }}>
+                            Nomor PO : {item.nopo}
+                        </Text>
+                    </View>
+
+                    <View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                paddingVertical: 5,
+                                borderBottomWidth: 0.3,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Tgl : </Text>
+                            <Text style={{ width: 270, textAlign: "right" }}>
+                                {item.tanggal}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Supplier : </Text>
+                            <Text style={{ width: 270, textAlign: "right" }}>
+                                {item.supplier}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Deskripsi : </Text>
+                            <Text style={{ width: 270, textAlign: "right" }}>
+                                {item.nama}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Departemen : </Text>
+                            <Text style={{ textAlign: "right" }}>
+                                {item.departemen}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>No. Pesanan : </Text>
+                            <Text style={{ textAlign: "right" }}>
+                                {item.nomorpesanan}
+                            </Text>
+                        </View>
+                    </View>
+
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            backgroundColor: "#A0C4FF20",
+                            paddingHorizontal: 10,
+                            paddingVertical: 3,
+                            marginTop: 5,
+                            borderRadius: 10,
+                        }}
+                    >
+                        <Text style={{ color: "#585858", fontSize: 12 }}>
+                            {"Qtty PO : " +
+                                item.qtypo +
+                                " | Qtty Beli : " + item.qtybeli +
+                                " | Sisa PO : " +
+                                (parseFloat(item.qtypo) - parseFloat(item.qtybeli))}
+                        </Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+        );
+    };
+
     return (
         <View style={styles.container}>
 
@@ -275,7 +592,7 @@ function orderScreen() {
                         borderRadius: 5,
                         marginRight: 8,
                     }}
-                    onPress={() => setModalVisible(true)}
+                    onPress={() => { setStatusPrint(""), setModalVisible(true) }}
                 >
                     <MaterialCommunityIcons
                         name="filter-variant"
@@ -292,7 +609,7 @@ function orderScreen() {
                         borderRadius: 5,
                         marginRight: 8,
                     }}
-                    onPress={() => setModalVisible(true)}
+                    onPress={() => { setStatusPrint("print"), setModalVisible(true) }}
                 >
                     <MaterialCommunityIcons
                         name="printer"
@@ -300,22 +617,48 @@ function orderScreen() {
                         color="#fff"
                     />
                 </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: peritem == false ? "#ecececff" : "#0085c8",
+                        paddingHorizontal: 10,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignContent: "center",
+                        borderRadius: 5,
+                        marginRight: 8,
+                    }}
+                    onPress={() => {
+                        setPeritem(!peritem),
+                            peritem == false
+                                ? handleDataPerItem("")
+                                : handleDataPerItem("perItem");
+                    }}
+                >
+                    <Text style={{ color: peritem ? "#fff" : "#000" }}>
+                        {peritem == false
+                            ? "Lihat PerItem"
+                            : "Kembali PerPO"}
+                    </Text>
+                </TouchableOpacity>
             </View>
 
             <View>
                 <FlatList
                     data={orderbarang}
-                    renderItem={renderOrderBarang}
+                    renderItem={peritem == false ? renderOrderBarang : renderOrderBarangItem}
                     keyExtractor={(item) => item.id}
                     onEndReached={() => {
-                        nextPage();
+                        peritem == false ? nextPage("") : nextPage("perItem");
                     }}
-                    onEndReachedThreshold={0.5}
+                    onEndReachedThreshold={0.3}
                     ListFooterComponent={loading && <ActivityIndicator size="large" />}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
-                            onRefresh={onRefresh}
+                            onRefresh={() => {
+                                peritem == false ? onRefresh("") : onRefresh("perItem");
+                            }}
                             colors={["#9Bd35A", "#689F38"]}
                         />
                     }
@@ -474,7 +817,7 @@ function orderScreen() {
                                     <Picker
                                         selectedValue={optionTahun}
                                         style={styles.picker}
-                                        onValueChange={(itemValue) =>{setOptionTahun(itemValue)}
+                                        onValueChange={(itemValue) => { setOptionTahun(itemValue) }
                                         }
                                     >
                                         <Picker.Item key="xnxx" label="Pilih Tahun" value="Pilih Tahun" />
@@ -497,17 +840,35 @@ function orderScreen() {
 
                         <View style={{ marginTop: 10 }}>
                             <Text style={{ fontSize: 17, marginBottom: 5 }}>Berdasarkan</Text>
-                            <View style={styles.pickerContainer}>
-                                <Picker
-                                    selectedValue={optionfilter}
-                                    style={styles.picker}
-                                    onValueChange={(itemValue) => setoptionfilter(itemValue)}
-                                >
-                                    <Picker.Item label="Nomor PO" value="Nomor PO" />
-                                    <Picker.Item label="Nama Supplier" value="Nama Supplier" />
-                                    <Picker.Item label="Departemen" value="Departemen" />
-                                </Picker>
-                            </View>
+
+                            {
+                                peritem == false ? (<View style={styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={optionfilter}
+                                        style={styles.picker}
+                                        onValueChange={(itemValue) => setoptionfilter(itemValue)}
+                                    >
+                                        <Picker.Item label="Nomor PO" value="Nomor PO" />
+                                        <Picker.Item label="Nama Supplier" value="Nama Supplier" />
+                                        <Picker.Item label="Departemen" value="Departemen" />
+                                    </Picker>
+                                </View>) : (<View style={styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={optionfilter}
+                                        style={styles.picker}
+                                        onValueChange={(itemValue) => setoptionfilter(itemValue)}
+                                    >
+                                        <Picker.Item label="Nomor PO" value="Nomor PO" />
+                                        <Picker.Item label="Departemen" value="Departemen" />
+                                        <Picker.Item label="Nomor Pesanan" value="Nomor Pesanan" />
+                                        <Picker.Item label="Kode Supplier" value="Kode Supplier" />
+                                        <Picker.Item label="Nama Supplier" value="Nama Supplier" />
+                                        <Picker.Item label="Kode Barang" value="Kode Barang" />
+                                        <Picker.Item label="Nama Barang" value="Nama Barang" />
+                                    </Picker>
+                                </View>)
+                            }
+
 
                             <View style={[styles.pickerContainer, { marginTop: 5 }]}>
                                 <TextInput
@@ -517,6 +878,18 @@ function orderScreen() {
                                     onChangeText={setKetOrder}
                                 />
                             </View>
+
+                            {
+                                statusprint === "print" ? (<View style={[styles.pickerContainer, { marginTop: 5 }]}><View>
+                                    <RadioButton.Group onValueChange={setPilihan} value={pilihan}>
+                                        <RadioButton.Item label="Semua" value="semua" />
+                                        <RadioButton.Item label="Sudah" value="sudah" />
+                                        <RadioButton.Item label="Belum" value="belum" />
+                                        <RadioButton.Item label="Close" value="close" />
+                                    </RadioButton.Group>
+                                </View></View>) : ""
+                            }
+
                         </View>
 
                         <View
@@ -524,7 +897,7 @@ function orderScreen() {
                         >
                             <TouchableOpacity
                                 onPress={() => {
-                                    resetAndFetch()
+                                    peritem == false ? resetAndFetch("") : resetAndFetch("perItem");
                                 }}
                                 style={{
                                     flex: 1,
@@ -559,10 +932,36 @@ function orderScreen() {
                                     Tutup
                                 </Text>
                             </TouchableOpacity>
+
+                            {pdfUri && (
+                                <>
+                                    <View>
+                                        <WebView
+                                            source={{ uri: pdfUri }}
+                                            originWhitelist={['*']}
+                                            useWebKit
+                                            javaScriptEnabled
+                                        />
+                                    </View>
+                                </>
+                            )}
                         </View>
                     </View>
                 </View>
             </Modal>
+
+            <CustomAlert
+                visible={showAlertInfoDownload}
+                title="Sukses!"
+                message="Laporan berhasil digenerate, jangan tutup pesan ini sebelum status download sukses"
+                icon={require('./../assets/images/success.png')}
+                onClose={() => { setPdfUri(null), setShowAlertInfoDownload(false) }}
+                onAcc={() => { }}
+                onDec={() => setShowAlertInfoDownload(false)}
+                option=""
+                textconfirmacc=""
+                textconfirmdec=""
+            />
         </View>
     );
 }
@@ -589,52 +988,52 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
     },
-      modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-  bottomModal: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  modalText: {
-    fontSize: 16,
-    marginTop: 10,
-  },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.4)",
+    },
+    bottomModal: {
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+        backgroundColor: "#fff",
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
+        elevation: 5,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+    },
+    modalText: {
+        fontSize: 16,
+        marginTop: 10,
+    },
     pickerContainer: {
-      borderRadius: 12,
-      backgroundColor: "#fff",
-      ...Platform.select({
-        android: {
-          borderWidth: 1,
-          borderColor: "#ccc",
-        },
-        ios: {
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-        },
-      }),
-      overflow: "hidden",
+        borderRadius: 12,
+        backgroundColor: "#fff",
+        ...Platform.select({
+            android: {
+                borderWidth: 1,
+                borderColor: "#ccc",
+            },
+            ios: {
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+            },
+        }),
+        overflow: "hidden",
     },
     picker: {
-      height: 50,
-      color: "#333",
-      paddingHorizontal: 10,
+        height: 50,
+        color: "#333",
+        paddingHorizontal: 10,
     },
     buttonTextrt: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+        color: "#fff",
+        fontWeight: "bold",
+    },
 });

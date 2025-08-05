@@ -15,6 +15,19 @@ export const getAllPesananRequest = async (wherelike:string,pageprev:number,page
   }
 };
 
+
+export const getAllPesananRequestPerItem = async (wherelike:string,pageprev:number,page:number,option:string,filter:string,tanggaldari:string,tanggalsampai:string,bulan:string,tahun:string) => {
+  try {
+    const response = await axios.get(`${baseUrl}stockpesanan/dataallitem?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`,{ headers });
+    //console.log(`${baseUrl}stockpesanan/dataallitem?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`);
+    return response.data.dataStockPesananItem;
+  } catch (error) {
+    //console.log(`${baseUrl}stockpesanan/dataallitem?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`);
+    console.error("Error pesanan request:", error);
+    throw error;
+  }
+};
+
 export const getPesananRequestByID = async (wherelike:string) => {
   try {
     const response = await axios.get(
@@ -68,10 +81,13 @@ export const updateStatusPesananRequest = async (id:string,status:string,checkus
 }
 
 export const printPesananRequest = async (kode:string) => {
- 
   return `${baseUrl}stockpesanan/printlaporanbyid?nomorinv=${kode}`;
-   
 }
+
+export const printAllRequest = async (wherelike:string,pageprev:number,page:number,option:string,filter:string,tanggaldari:string,tanggalsampai:string,bulan:string,tahun:string) => {
+  //console.log(`${baseUrl}stockpesanan/printlaporan?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`);
+  return `${baseUrl}stockpesanan/printlaporan?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`;
+};
 
 export const checkuserpremis = async(user:string)=>{
   try {

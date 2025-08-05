@@ -11,7 +11,6 @@ export default function HomeScreen() {
     
     const scaleAnim = new Animated.Value(1);
 
-
     const {
         isLogin,
         setLogin,
@@ -37,10 +36,10 @@ export default function HomeScreen() {
         { id: '3', label: 'Keluar', icon: 'exit-to-app', color: '#A0C4FF', count: -1 },
         { id: '4', label: 'Mutasi', icon: 'sync', color: '#A0C4FF', count: -1 },
         { id: '5', label: 'C. Pesan', icon: 'window-closed', color: '#A0C4FF', count: -1 },
-        { id: '6', label: 'C. Order', icon: 'window-closed', color: '#A0C4FF', count: -1 },
-        { id: '7', label: 'Retur', icon: 'keyboard-return', color: '#A0C4FF', count: -1 },
-        { id: '8', label: 'Adjust', icon: 'adjust', color: '#A0C4FF', count: -1 },
-        { id: '9', label: 'Hutang', icon: 'cash-100', color: '#A0C4FF', count: -1 },
+        // { id: '6', label: 'C. Order', icon: 'window-closed', color: '#A0C4FF', count: -1 },
+        // { id: '7', label: 'Retur', icon: 'keyboard-return', color: '#A0C4FF', count: -1 },
+        // { id: '8', label: 'Adjust', icon: 'adjust', color: '#A0C4FF', count: -1 },
+        // { id: '9', label: 'Hutang', icon: 'cash-100', color: '#A0C4FF', count: -1 },
     ];
 
     const master = [
@@ -95,7 +94,6 @@ export default function HomeScreen() {
     const renderTransaksi = ({ item }) => {
         const isSelected = item.id === selectedCategory;
         
-
         return (
             <TouchableOpacity onPress={() => handlePressTransaksi(item.id)}>
                 <Animated.View
@@ -146,7 +144,7 @@ export default function HomeScreen() {
                 ))}
             </View>
 
-            <Text style={{ color: '#585858', fontWeight: 'bold', fontSize: 16, textTransform: 'capitalize' }}>Master</Text>
+            {/* <Text style={{ color: '#585858', fontWeight: 'bold', fontSize: 16, textTransform: 'capitalize' }}>Master</Text>
 
             <View style={[styles.categoryWrapper, { flexDirection: 'row', flexWrap: 'wrap', gap: 15 }]}>
                 {master.map((item) => (
@@ -154,7 +152,7 @@ export default function HomeScreen() {
                         {renderMaster({ item })}
                     </View>
                 ))}
-            </View>
+            </View> */}
 
         </View>
     );
