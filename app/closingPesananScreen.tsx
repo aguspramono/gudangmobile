@@ -284,23 +284,6 @@ function closingPesananScreen() {
                         color="#fff"
                     />
                 </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={{
-                        backgroundColor: "#0085c8",
-                        paddingHorizontal: 5,
-                        paddingVertical: 5,
-                        borderRadius: 5,
-                        marginRight: 8,
-                    }}
-                    onPress={() => setModalVisible(true)}
-                >
-                    <MaterialCommunityIcons
-                        name="printer"
-                        size={26}
-                        color="#fff"
-                    />
-                </TouchableOpacity>
             </View>
 
             <View>

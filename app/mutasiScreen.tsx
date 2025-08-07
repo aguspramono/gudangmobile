@@ -13,12 +13,14 @@ import {
 } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { getAllMutasiRequest, getAllMutasiItemRequest } from "./../func/mutasiFunc";
+import { getAllMutasiRequest, getAllMutasiItemRequest, printAllRequest } from "./../func/mutasiFunc";
 import { DateFormat } from "./../func/global/globalFunc";
 import { Picker } from "@react-native-picker/picker";
-import {Optiongudang} from './../component/optiongudang';
+import { Optiongudang } from './../component/optiongudang';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { router, useFocusEffect } from "expo-router";
+import { WebView } from 'react-native-webview';
+import CustomAlert from './../component/sweetalert';
 
 function mutasiScreen() {
     const [mutasibarang, setMutasiBarang] = useState<any[]>([]);
@@ -42,6 +44,9 @@ function mutasiScreen() {
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [peritem, setPeritem] = useState(false);
     const [lastStatusReq, setLastStatusReq] = useState("");
+    const [statusprint, setStatusPrint] = useState("");
+    const [pdfUri, setPdfUri] = useState(null);
+    const [showAlertInfoDownload, setShowAlertInfoDownload] = useState(false);
 
     const showDatePickerDari = () => {
         setDatePickerVisibility(true);
@@ -69,11 +74,11 @@ function mutasiScreen() {
         hideDatePickerSampai();
     };
 
-    const handleDarigudang = (e:any) => {
+    const handleDarigudang = (e: any) => {
         setDarigudang(e);
     }
 
-    const handleKegudang = (e:any) => {
+    const handleKegudang = (e: any) => {
         setKegudang(e);
     }
 
@@ -297,7 +302,7 @@ function mutasiScreen() {
         }
     };
 
-    const resetAndFetch = (statusReq: string) => {
+    const resetAndFetch = async (statusReq: string) => {
         let tanggaldari = "2025-07-07";
         let tanggalsampai = "2025-07-07";
 
@@ -306,29 +311,47 @@ function mutasiScreen() {
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
 
-        if (statusReq === "perItem") {
+        if (statusprint === "") {
+            if (statusReq === "perItem") {
 
-            fetchData(
-                ketmutasi,
-                nextPageAct,
-                30,
-                optionfilter,
-                optionfiltertanggal,
-                tanggaldari,
-                tanggalsampai,
-                optionbulan,
-                optionTahun,
-                darigudang,
-                kegudang,
-                "filter",
-                "perItem"
-            );
+                fetchData(
+                    ketmutasi,
+                    nextPageAct,
+                    30,
+                    optionfilter,
+                    optionfiltertanggal,
+                    tanggaldari,
+                    tanggalsampai,
+                    optionbulan,
+                    optionTahun,
+                    darigudang,
+                    kegudang,
+                    "filter",
+                    "perItem"
+                );
 
+            } else {
+                fetchData(
+                    ketmutasi,
+                    nextPageAct,
+                    30,
+                    optionfilter,
+                    optionfiltertanggal,
+                    tanggaldari,
+                    tanggalsampai,
+                    optionbulan,
+                    optionTahun,
+                    darigudang,
+                    kegudang,
+                    "filter",
+                    ""
+                );
+            }
         } else {
-            fetchData(
+            const url = await printAllRequest(
                 ketmutasi,
-                nextPageAct,
-                30,
+                0,
+                0,
                 optionfilter,
                 optionfiltertanggal,
                 tanggaldari,
@@ -336,12 +359,11 @@ function mutasiScreen() {
                 optionbulan,
                 optionTahun,
                 darigudang,
-                kegudang,
-                "filter",
-                ""
+                kegudang
             );
+            setPdfUri(url);
+            setShowAlertInfoDownload(true)
         }
-
     };
 
     const onRefresh = useCallback((statusReq: string) => {
@@ -497,7 +519,7 @@ function mutasiScreen() {
                             }}
                         >
                             <Text>Dari Gudang : </Text>
-                            <Text style={{textAlign: "right" }}>
+                            <Text style={{ textAlign: "right" }}>
                                 {item.GdgAsal}
                             </Text>
                         </View>
@@ -581,7 +603,7 @@ function mutasiScreen() {
                         borderRadius: 5,
                         marginRight: 8,
                     }}
-                    onPress={() => setModalVisible(true)}
+                    onPress={() => { setStatusPrint(""), setModalVisible(true) }}
                 >
                     <MaterialCommunityIcons
                         name="filter-variant"
@@ -598,7 +620,7 @@ function mutasiScreen() {
                         borderRadius: 5,
                         marginRight: 8,
                     }}
-                    onPress={() => setModalVisible(true)}
+                    onPress={() => { setStatusPrint("print"), setModalVisible(true) }}
                 >
                     <MaterialCommunityIcons
                         name="printer"
@@ -832,24 +854,24 @@ function mutasiScreen() {
 
                             {
                                 peritem == false ? (<View style={styles.pickerContainer}>
-                                <Picker
-                                    selectedValue={optionfilter}
-                                    style={styles.picker}
-                                    onValueChange={(itemValue) => setoptionfilter(itemValue)}
-                                >
-                                    <Picker.Item label="Nomor Bukti" value="Nomor Bukti" />
-                                </Picker>
-                            </View>):(<View style={styles.pickerContainer}>
-                                <Picker
-                                    selectedValue={optionfilter}
-                                    style={styles.picker}
-                                    onValueChange={(itemValue) => setoptionfilter(itemValue)}
-                                >
-                                    <Picker.Item label="Nomor Bukti" value="Nomor Bukti" />
-                                    <Picker.Item label="Kode Barang" value="Kode Barang" />
-                                    <Picker.Item label="Nama Barang" value="Nama Barang" />
-                                </Picker>
-                            </View>)
+                                    <Picker
+                                        selectedValue={optionfilter}
+                                        style={styles.picker}
+                                        onValueChange={(itemValue) => setoptionfilter(itemValue)}
+                                    >
+                                        <Picker.Item label="Nomor Bukti" value="Nomor Bukti" />
+                                    </Picker>
+                                </View>) : (<View style={styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={optionfilter}
+                                        style={styles.picker}
+                                        onValueChange={(itemValue) => setoptionfilter(itemValue)}
+                                    >
+                                        <Picker.Item label="Nomor Bukti" value="Nomor Bukti" />
+                                        <Picker.Item label="Kode Barang" value="Kode Barang" />
+                                        <Picker.Item label="Nama Barang" value="Nama Barang" />
+                                    </Picker>
+                                </View>)
                             }
 
                             <View style={[styles.pickerContainer, { marginTop: 5 }]}>
@@ -871,8 +893,27 @@ function mutasiScreen() {
                                 <Optiongudang onChange={handleKegudang} />
                             </View>
 
+                            {
+                                statusprint === "print" ? (
+                                    <View style={{
+                                        flexDirection: "row",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        backgroundColor: "#ffe1a020",
+                                        paddingHorizontal: 10,
+                                        paddingVertical: 3,
+                                        marginTop: 5,
+                                        borderRadius: 10,
+                                    }}>
 
-                            
+                                        <Text>Mencetak laporan dengan banyak data dapat menyebabkan terjadi smartphone lambat, jika ingin mencetak banyak data harap melakukan melalui aplikasi komputer.</Text>
+
+                                    </View>
+                                ) : ""
+                            }
+
+
+
                         </View>
 
                         <View
@@ -915,10 +956,35 @@ function mutasiScreen() {
                                     Tutup
                                 </Text>
                             </TouchableOpacity>
+
+                            {pdfUri && (
+                                <>
+                                    <View>
+                                        <WebView
+                                            source={{ uri: pdfUri }}
+                                            originWhitelist={['*']}
+                                            useWebKit
+                                            javaScriptEnabled
+                                        />
+                                    </View>
+                                </>
+                            )}
                         </View>
                     </View>
                 </View>
             </Modal>
+            <CustomAlert
+                visible={showAlertInfoDownload}
+                title="Sukses!"
+                message="Laporan berhasil digenerate, jangan tutup pesan ini sebelum status download sukses"
+                icon={require('./../assets/images/success.png')}
+                onClose={() => { setPdfUri(null), setShowAlertInfoDownload(false) }}
+                onAcc={() => { }}
+                onDec={() => setShowAlertInfoDownload(false)}
+                option=""
+                textconfirmacc=""
+                textconfirmdec=""
+            />
         </View>
     );
 

@@ -69,6 +69,6 @@ export const printPesananRequest = async (kode:string) => {
 }
 
 export const printAllRequest = async (wherelike:string,pageprev:number,page:number,option:string,filter:string,tanggaldari:string,tanggalsampai:string,bulan:string,tahun:string,darigudang:string,kegudang:string) => {
-  //console.log(`${baseUrl}stockpurch/printlaporan?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}&pilihan=${pilihan}`);
+  //console.log(`${baseUrl}stockout/printlaporan?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}&darigudang=${darigudang}&kegudang=${kegudang}`);
   return `${baseUrl}stockout/printlaporan?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}&darigudang=${darigudang}&kegudang=${kegudang}`;
 }

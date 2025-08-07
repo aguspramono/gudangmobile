@@ -423,7 +423,7 @@ function detailTerimaBarang() {
             <CustomAlert
                 visible={showAlertInfoDownload}
                 title="Sukses!"
-                message="Laporan berhasil didownload."
+                message="Laporan berhasil digenerate, jangan tutup pesan ini sebelum status download sukses."
                 icon={require('./../assets/images/success.png')}
                 onClose={() => { setPdfUri(null), setShowAlertInfoDownload(false) }}
                 onAcc={() => { }}

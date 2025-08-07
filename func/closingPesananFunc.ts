@@ -48,3 +48,9 @@ export const getAllClosingPesananDetailRequestByid = async (wherelike:string) =>
       throw error;
     }
 };
+
+export const printPesananRequest = async (kode:string) => {
+ 
+  return `${baseUrl}stockclosingpesanan/printbyid?nomorinv=${kode}`;
+   
+}
