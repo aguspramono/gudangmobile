@@ -337,7 +337,7 @@ export default function pesananScreen() {
           ""
         );
       }
-    } else if(statusprint==="print") {
+    } else if (statusprint === "print") {
       const url = await printAllRequest(
         ketpesanan,
         0,
@@ -635,7 +635,7 @@ export default function pesananScreen() {
             borderRadius: 5,
             marginRight: 8,
           }}
-          onPress={() => {setStatusPrint(""),setModalVisible(true)}}
+          onPress={() => { setStatusPrint(""), setModalVisible(true) }}
         >
           <MaterialCommunityIcons
             name="filter-variant"
@@ -652,7 +652,7 @@ export default function pesananScreen() {
             borderRadius: 5,
             marginRight: 8,
           }}
-          onPress={() =>{setStatusPrint("print"),setModalVisible(true)}}
+          onPress={() => { setStatusPrint("print"), setModalVisible(true) }}
         >
           <MaterialCommunityIcons
             name="printer"
@@ -942,6 +942,23 @@ export default function pesananScreen() {
                   onChangeText={setKetPesanan}
                 />
               </View>
+
+              {
+                statusprint === "print" ? (
+                  <View style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    backgroundColor: "#ffe1a020",
+                    paddingHorizontal: 10,
+                    paddingVertical: 3,
+                    marginTop: 5,
+                    borderRadius: 10,
+                  }}>
+                    <Text>Mencetak laporan dengan banyak data dapat menyebabkan terjadi smartphone lambat, jika ingin mencetak banyak data harap melakukan melalui aplikasi komputer.</Text>
+                  </View>
+                ) : ""
+              }
             </View>
 
             <View

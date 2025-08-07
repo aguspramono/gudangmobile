@@ -15,12 +15,15 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import {
-    getAllKeluarRequest
+    getAllKeluarRequest, getAllKeluarPerItemRequest, printAllRequest
 } from "./../func/keluarFunc";
 import { router, useFocusEffect } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { DateFormat } from "./../func/global/globalFunc";
+import CustomAlert from './../component/sweetalert';
+import { WebView } from 'react-native-webview';
+import { Optiongudang } from './../component/optiongudang';
 
 function keluarScreen() {
     const [keluarbarang, setKeluarBarang] = useState<any[]>([]);
@@ -33,6 +36,10 @@ function keluarScreen() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDateSampai, setSelectedDateSampai] = useState(null);
     const [limitQuery, setLimitQuery] = useState(0);
+    const [peritem, setPeritem] = useState(false);
+    const [lastStatusReq, setLastStatusReq] = useState("");
+    const [darigudang, setDarigudang] = useState("");
+    const [kegudang, setKegudang] = useState("");
 
     const [refreshing, setRefreshing] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -40,6 +47,10 @@ function keluarScreen() {
     const [isDatePickerVisibleSampai, setDatePickerVisibilitySampai] =
         useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+    const [statusprint, setStatusPrint] = useState("");
+    const [pdfUri, setPdfUri] = useState(null);
+    const [showAlertInfoDownload, setShowAlertInfoDownload] = useState(false);
 
     const showDatePickerDari = () => {
         setDatePickerVisibility(true);
@@ -67,6 +78,51 @@ function keluarScreen() {
         hideDatePickerSampai();
     };
 
+    const handleDarigudang = (e: any) => {
+        setDarigudang(e);
+    }
+
+    const handleKegudang = (e: any) => {
+        setKegudang(e);
+    }
+
+    const handleDataPerItem = (status: string) => {
+        if (status == "perItem") {
+            fetchData(
+                "",
+                0,
+                30,
+                "Nomor Invoice",
+                "Semua",
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                "",
+                "",
+                "",
+                "",
+            );
+        } else {
+            fetchData(
+                "",
+                0,
+                30,
+                "Nomor Invoice",
+                "Semua",
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                "",
+                "",
+                "",
+                "perItem"
+            );
+        }
+    };
+
+
     const handlePressKeluarBarang = (itemId) => {
         router.navigate({ pathname: "detailKeluarBarang", params: { id: itemId } });
     };
@@ -81,41 +137,87 @@ function keluarScreen() {
         tanggalsampai: string,
         bulan: string,
         tahun: string,
-        setReq: string
+        drgudang: string,
+        kgudang: string,
+        setReq: string,
+        statusReq: string
     ) => {
         const keluarbarangitem = [];
-        const response = await getAllKeluarRequest(
-            like,
-            limitqueryprev,
-            limitquery,
-            option,
-            filter,
-            tanggaldari,
-            tanggalsampai,
-            bulan,
-            tahun
-        );
 
-        response.map((item, i) =>
-            keluarbarangitem.push({
-                id: item.InvNum + page + i,
-                inv: item.InvNum,
-                detail: item.Qtty + " item keluar barang",
-                tanggal: item.Tanggal
-            })
-        );
+        if (statusReq !== lastStatusReq) {
+            setKeluarBarang([]);
+        }
 
-        if (setReq === "filter") {
+        if (statusReq === "perItem") {
+
+            const response = await getAllKeluarPerItemRequest(
+                like,
+                limitqueryprev,
+                limitquery,
+                option,
+                filter,
+                tanggaldari,
+                tanggalsampai,
+                bulan,
+                tahun,
+                drgudang,
+                kgudang
+            );
+
+            response.map((item, i) =>
+                keluarbarangitem.push({
+                    id: item.InvNum + page + i + "peritem",
+                    InvNum: item.InvNum,
+                    Tgl: item.Tgl,
+                    Departemen: item.Departemen,
+                    NamaBrg: item.NamaBrg,
+                    Kode: item.Kode,
+                    Gudang: item.Gudang,
+                    Qtty: item.Qtty,
+                    Harga: item.Harga,
+                    Alokasi: item.Alokasi,
+                    Merek: item.Merek,
+                })
+            );
+
+        } else {
+            const response = await getAllKeluarRequest(
+                like,
+                limitqueryprev,
+                limitquery,
+                option,
+                filter,
+                tanggaldari,
+                tanggalsampai,
+                bulan,
+                tahun,
+                drgudang,
+                kgudang
+            );
+
+            response.map((item, i) =>
+                keluarbarangitem.push({
+                    id: item.InvNum + page + i,
+                    inv: item.InvNum,
+                    detail: item.Qtty + " item keluar barang",
+                    tanggal: item.Tanggal
+                })
+            );
+        }
+
+
+        if (setReq === "filter" || statusReq !== lastStatusReq) {
             setKeluarBarang(keluarbarangitem);
         } else {
             setKeluarBarang([...keluarbarang, ...keluarbarangitem]);
         }
+        setLastStatusReq(statusReq);
     };
 
     let limitPage = 0;
     let nextPageAct = 0;
 
-    const nextPage = async () => {
+    const nextPage = async (statusReq: string) => {
 
         let tanggaldari = "2025-07-07";
         let tanggalsampai = "2025-07-07";
@@ -124,8 +226,48 @@ function keluarScreen() {
             tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
-        const response = await getAllKeluarRequest(ketkeluar, 0, 0, optionfilter, optionfiltertanggal, tanggaldari, tanggalsampai, optionbulan, optionTahun);
-        limitPage = Math.ceil(response.length / 10);
+
+        let jumlahdataresponse = 0;
+
+        if (statusReq == "perItem") {
+            const response = await getAllKeluarPerItemRequest(
+                ketkeluar,
+                0,
+                0,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                darigudang,
+                kegudang
+            );
+
+            jumlahdataresponse = response;
+
+            //console.log(response);
+
+        } else {
+
+            const response = await getAllKeluarRequest(
+                ketkeluar,
+                0,
+                0,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                darigudang,
+                kegudang
+            );
+
+            jumlahdataresponse = response.length;
+        }
+
+        limitPage = Math.ceil(jumlahdataresponse / 10);
 
         if (page >= limitPage) {
             setPage(limitPage);
@@ -136,26 +278,50 @@ function keluarScreen() {
         nextPageAct = limitQuery + 30;
         setLimitQuery(nextPageAct);
 
-        if (nextPageAct >= response.length) {
-            nextPageAct = response.length;
+        if (nextPageAct >= jumlahdataresponse) {
+            nextPageAct = jumlahdataresponse;
             setLimitQuery(nextPageAct);
         }
 
-        fetchData(
-            ketkeluar,
-            nextPageAct,
-            30,
-            optionfilter,
-            optionfiltertanggal,
-            tanggaldari,
-            tanggalsampai,
-            optionbulan,
-            optionTahun,
-            ""
-        );
+        if (statusReq == "perItem") {
+
+            fetchData(
+                ketkeluar,
+                nextPageAct,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                darigudang,
+                kegudang,
+                "",
+                "perItem"
+            );
+
+        } else {
+
+            fetchData(
+                ketkeluar,
+                nextPageAct,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                darigudang,
+                kegudang,
+                "",
+                ""
+            );
+        }
     };
 
-    const resetAndFetch = () => {
+    const resetAndFetch = async (statusReq: string) => {
         let tanggaldari = "2025-07-07";
         let tanggalsampai = "2025-07-07";
 
@@ -163,34 +329,100 @@ function keluarScreen() {
             tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
-        fetchData(
-            ketkeluar,
-            nextPageAct,
-            30,
-            optionfilter,
-            optionfiltertanggal,
-            tanggaldari,
-            tanggalsampai,
-            optionbulan,
-            optionTahun,
-            "filter"
-        );
+
+        if (statusprint === "") {
+            if (statusReq === "perItem") {
+                fetchData(
+                    ketkeluar,
+                    nextPageAct,
+                    30,
+                    optionfilter,
+                    optionfiltertanggal,
+                    tanggaldari,
+                    tanggalsampai,
+                    optionbulan,
+                    optionTahun,
+                    darigudang,
+                    kegudang,
+                    "filter",
+                    "perItem"
+                );
+            } else {
+                fetchData(
+                    ketkeluar,
+                    nextPageAct,
+                    30,
+                    optionfilter,
+                    optionfiltertanggal,
+                    tanggaldari,
+                    tanggalsampai,
+                    optionbulan,
+                    optionTahun,
+                    darigudang,
+                    kegudang,
+                    "filter",
+                    ""
+                );
+
+            }
+        } else {
+            const url = await printAllRequest(
+                ketkeluar,
+                0,
+                0,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                darigudang,
+                kegudang
+            );
+            setPdfUri(url);
+            setShowAlertInfoDownload(true)
+        }
+
+
     };
 
-    const onRefresh = useCallback(() => {
+    const onRefresh = useCallback((statusReq: string) => {
         setRefreshing(true);
-        fetchData(
-            ketkeluar,
-            0,
-            30,
-            optionfilter,
-            optionfiltertanggal,
-            "2025-01-01",
-            "2025-12-31",
-            optionbulan,
-            optionTahun,
-            '',
-        );
+
+        if (statusReq == "perItem") {
+            fetchData(
+                ketkeluar,
+                0,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                '',
+                '',
+                '',
+                'perItem'
+            );
+        } else {
+            fetchData(
+                ketkeluar,
+                0,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                '',
+                '',
+                '',
+                '',
+            );
+        }
+
         setTimeout(() => {
             setRefreshing(false);
         }, 2000);
@@ -209,6 +441,9 @@ function keluarScreen() {
             optionbulan,
             optionTahun,
             '',
+            '',
+            '',
+            ''
         );
     }, []);
 
@@ -254,6 +489,148 @@ function keluarScreen() {
         );
     };
 
+
+    const renderKeluarBarangItem = ({ item }) => {
+        return (
+            <TouchableOpacity
+                style={{
+                    marginTop: 8,
+                    paddingVertical: 10,
+                    paddingHorizontal: 15,
+                    borderRadius: 15,
+                    backgroundColor: "#fff",
+                }}
+                onPress={() => console.log(item.InvNum)}
+            >
+                <View>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
+                    >
+                        <Text style={{ fontWeight: "bold", color: "#585858" }}>
+                            Nomor Invoice : {item.InvNum}
+                        </Text>
+                    </View>
+
+                    <View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                paddingVertical: 5,
+                                borderBottomWidth: 0.3,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Tgl : </Text>
+                            <Text style={{ width: 270, textAlign: "right" }}>
+                                {item.Tgl}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Departemen / Gudang : </Text>
+                            <Text style={{ width: 150, textAlign: "right" }}>
+                                {item.Departemen}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Deskripsi : </Text>
+                            <Text style={{ width: 270, textAlign: "right" }}>
+                                {item.NamaBrg}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Gudang : </Text>
+                            <Text style={{ textAlign: "right" }}>
+                                {item.Gudang}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Alokasi : </Text>
+                            <Text style={{ textAlign: "right" }}>
+                                {item.Alokasi}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Merek : </Text>
+                            <Text style={{ textAlign: "right" }}>
+                                {item.Merek}
+                            </Text>
+                        </View>
+                    </View>
+
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            backgroundColor: "#A0C4FF20",
+                            paddingHorizontal: 10,
+                            paddingVertical: 3,
+                            marginTop: 5,
+                            borderRadius: 10,
+                        }}
+                    >
+                        <Text style={{ color: "#585858", fontSize: 12 }}>
+                            {"Qtty : " +
+                                item.Qtty +
+                                " | Harga : " + item.Harga}
+                        </Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+        );
+    };
+
     return (
         <View style={styles.container}>
 
@@ -278,7 +655,7 @@ function keluarScreen() {
                         borderRadius: 5,
                         marginRight: 8,
                     }}
-                    onPress={() => setModalVisible(true)}
+                    onPress={() => { setStatusPrint(""), setModalVisible(true) }}
                 >
                     <MaterialCommunityIcons
                         name="filter-variant"
@@ -295,7 +672,7 @@ function keluarScreen() {
                         borderRadius: 5,
                         marginRight: 8,
                     }}
-                    onPress={() => setModalVisible(true)}
+                    onPress={() => { setStatusPrint("print"), setModalVisible(true) }}
                 >
                     <MaterialCommunityIcons
                         name="printer"
@@ -303,22 +680,48 @@ function keluarScreen() {
                         color="#fff"
                     />
                 </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: peritem == false ? "#ecececff" : "#0085c8",
+                        paddingHorizontal: 10,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignContent: "center",
+                        borderRadius: 5,
+                        marginRight: 8,
+                    }}
+                    onPress={() => {
+                        setPeritem(!peritem),
+                            peritem == false
+                                ? handleDataPerItem("")
+                                : handleDataPerItem("perItem");
+                    }}
+                >
+                    <Text style={{ color: peritem ? "#fff" : "#000" }}>
+                        {peritem == false
+                            ? "Lihat PerItem"
+                            : "Kembali PerInv"}
+                    </Text>
+                </TouchableOpacity>
             </View>
 
             <View>
                 <FlatList
                     data={keluarbarang}
-                    renderItem={renderKeluarBarang}
+                    renderItem={peritem == false ? renderKeluarBarang : renderKeluarBarangItem}
                     keyExtractor={(item) => item.id}
                     onEndReached={() => {
-                        nextPage();
+                        peritem == false ? nextPage("") : nextPage("perItem");
                     }}
-                    onEndReachedThreshold={0.5}
+                    onEndReachedThreshold={0.3}
                     ListFooterComponent={loading && <ActivityIndicator size="large" />}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
-                            onRefresh={onRefresh}
+                            onRefresh={() => {
+                                peritem == false ? onRefresh("") : onRefresh("perItem");
+                            }}
                             colors={["#9Bd35A", "#689F38"]}
                         />
                     }
@@ -508,8 +911,6 @@ function keluarScreen() {
                                 >
                                     <Picker.Item label="Nomor Invoice" value="Nomor Invoice" />
                                     <Picker.Item label="Departemen" value="Departemen" />
-                                    <Picker.Item label="Dari Gudang" value="Dari Gudang" />
-                                    <Picker.Item label="Ke Gudang" value="Ke Gudang" />
                                 </Picker>
                             </View>
 
@@ -521,6 +922,34 @@ function keluarScreen() {
                                     onChangeText={setKetKeluar}
                                 />
                             </View>
+
+                            <View style={{ marginTop: 10 }}>
+                                <Text style={{ fontSize: 17, marginBottom: 5 }}>Dari Gudang</Text>
+                                <Optiongudang onChange={handleDarigudang} />
+                            </View>
+
+                            <View style={{ marginTop: 10 }}>
+                                <Text style={{ fontSize: 17, marginBottom: 5 }}>Ke Gudang</Text>
+                                <Optiongudang onChange={handleKegudang} />
+                            </View>
+
+
+                            {
+                                statusprint === "print" ? (
+                                    <View style={{
+                                        flexDirection: "row",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        backgroundColor: "#ffe1a020",
+                                        paddingHorizontal: 10,
+                                        paddingVertical: 3,
+                                        marginTop: 5,
+                                        borderRadius: 10,
+                                    }}>
+                                        <Text>Mencetak laporan dengan banyak data dapat menyebabkan terjadi smartphone lambat, jika ingin mencetak banyak data harap melakukan melalui aplikasi komputer.</Text>
+                                    </View>
+                                ) : ""
+                            }
                         </View>
 
                         <View
@@ -528,7 +957,7 @@ function keluarScreen() {
                         >
                             <TouchableOpacity
                                 onPress={() => {
-                                    resetAndFetch()
+                                    peritem == false ? resetAndFetch("") : resetAndFetch("perItem");
                                 }}
                                 style={{
                                     flex: 1,
@@ -563,10 +992,36 @@ function keluarScreen() {
                                     Tutup
                                 </Text>
                             </TouchableOpacity>
+
+                            {pdfUri && (
+                                <>
+                                    <View>
+                                        <WebView
+                                            source={{ uri: pdfUri }}
+                                            originWhitelist={['*']}
+                                            useWebKit
+                                            javaScriptEnabled
+                                        />
+                                    </View>
+                                </>
+                            )}
                         </View>
                     </View>
                 </View>
             </Modal>
+
+            <CustomAlert
+                visible={showAlertInfoDownload}
+                title="Sukses!"
+                message="Laporan berhasil digenerate, jangan tutup pesan ini sebelum status download sukses"
+                icon={require('./../assets/images/success.png')}
+                onClose={() => { setPdfUri(null), setShowAlertInfoDownload(false) }}
+                onAcc={() => { }}
+                onDec={() => setShowAlertInfoDownload(false)}
+                option=""
+                textconfirmacc=""
+                textconfirmdec=""
+            />
         </View>
     );
 

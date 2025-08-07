@@ -5,13 +5,28 @@ const headers = {
     "Content-Type": "multipart/form-data",
 };
 
-export const getAllMutasiRequest = async (wherelike: string, pageprev: number, page: number, option: string, filter: string, tanggaldari: string, tanggalsampai: string, bulan: string, tahun: string) => {
+export const getAllMutasiRequest = async (wherelike: string, pageprev: number, page: number, option: string, filter: string, tanggaldari: string, tanggalsampai: string, bulan: string, tahun: string,darigudang:string,kegudang:string) => {
     try {
         const response = await axios.get(
-            `${baseUrl}stockin?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`, { headers: headers }
+            `${baseUrl}stockin?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}&darigudang=${darigudang}&kegudang=${kegudang}`, { headers: headers }
         );
 
         return response.data.dataStockIn;
+    } catch (error) {
+        //console.log(`${baseUrl}stockin?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`)
+        console.error("Error mutasi request:", error);
+        throw error;
+    }
+};
+
+
+export const getAllMutasiItemRequest = async (wherelike: string, pageprev: number, page: number, option: string, filter: string, tanggaldari: string, tanggalsampai: string, bulan: string, tahun: string,darigudang:string,kegudang:string) => {
+    try {
+        const response = await axios.get(
+            `${baseUrl}stockin/dataitem?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}&darigudang=${darigudang}&kegudang=${kegudang}`, { headers: headers }
+        );
+
+        return response.data.dataStockInItem;
     } catch (error) {
         //console.log(`${baseUrl}stockin?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}`)
         console.error("Error mutasi request:", error);

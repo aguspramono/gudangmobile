@@ -63,7 +63,10 @@ export const getAllTerimaDetailRequestbyId = async (wherelike:string) => {
 };
 
 export const printPesananRequest = async (kode:string) => {
- 
   return `${baseUrl}stockpurch/printlaporanbyid?nomorinv=${kode}`;
-   
+}
+
+export const printAllRequest = async (wherelike:string,pageprev:number,page:number,option:string,filter:string,tanggaldari:string,tanggalsampai:string,bulan:string,tahun:string,pilihan:string) => {
+  //console.log(`${baseUrl}stockpurch/printlaporan?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}&pilihan=${pilihan}`);
+  return `${baseUrl}stockpurch/printlaporan?like=${wherelike}&pageprev=${pageprev}&page=${page}&option=${option}&filter=${filter}&tanggaldari=${tanggaldari}&tanggalsampai=${tanggalsampai}&bulan=${bulan}&tahun=${tahun}&pilihan=${pilihan}`;
 }

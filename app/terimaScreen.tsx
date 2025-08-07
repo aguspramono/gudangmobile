@@ -17,11 +17,15 @@ import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import {
   getAllTerimaRequest,
   getAllTerimaPerItemRequest,
+  printAllRequest
 } from "./../func/terimaFunc";
 import { router, useFocusEffect } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { DateFormat } from "./../func/global/globalFunc";
+import { RadioButton } from 'react-native-paper';
+import { WebView } from 'react-native-webview';
+import CustomAlert from './../component/sweetalert';
 
 export default function terimaScreen() {
   const [terimabarang, setTerimaBarang] = useState<any[]>([]);
@@ -33,6 +37,7 @@ export default function terimaScreen() {
   const [optionfiltertanggal, setoptionfiltertanggal] = useState("Semua");
   const [optionbulan, setOptionBulan] = useState("Bulan");
   const [optionTahun, setOptionTahun] = useState("Tahun");
+  const [pilihan, setPilihan] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDateSampai, setSelectedDateSampai] = useState(null);
   const [limitQuery, setLimitQuery] = useState(0);
@@ -41,6 +46,9 @@ export default function terimaScreen() {
   const [loading, setLoading] = useState(false);
   const [lastStatusReq, setLastStatusReq] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [statusprint, setStatusPrint] = useState("");
+  const [pdfUri, setPdfUri] = useState(null);
+  const [showAlertInfoDownload, setShowAlertInfoDownload] = useState(false);
 
   const [isDatePickerVisibleSampai, setDatePickerVisibilitySampai] =
     useState(false);
@@ -94,7 +102,7 @@ export default function terimaScreen() {
   ) => {
     const terimabarangitem = [];
 
-     if (statusReq !== lastStatusReq) {
+    if (statusReq !== lastStatusReq) {
       setTerimaBarang([]);
     }
 
@@ -142,8 +150,6 @@ export default function terimaScreen() {
 
         jumlahgrandvalppn =
           jumlahgrandvalppn + nominalppngrand - nominaldiskongrand;
-
-
 
         terimabarangitem.push({
           id: item.InvNum + page + i + "peritem",
@@ -280,7 +286,7 @@ export default function terimaScreen() {
     }
   };
 
-  const resetAndFetch = (statusReq: string) => {
+  const resetAndFetch = async (statusReq: string) => {
     let tanggaldari = "2025-07-07";
     let tanggalsampai = "2025-07-07";
 
@@ -288,34 +294,54 @@ export default function terimaScreen() {
       tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
       tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
     }
-    if (statusReq === "perItem") {
-      fetchData(
-        ketTerima,
-        nextPageAct,
-        30,
-        optionfilter,
-        optionfiltertanggal,
-        tanggaldari,
-        tanggalsampai,
-        optionbulan,
-        optionTahun,
-        "filter",
-        "perItem"
-      );
+
+    if (statusprint === "") {
+
+      if (statusReq === "perItem") {
+        fetchData(
+          ketTerima,
+          nextPageAct,
+          30,
+          optionfilter,
+          optionfiltertanggal,
+          tanggaldari,
+          tanggalsampai,
+          optionbulan,
+          optionTahun,
+          "filter",
+          "perItem"
+        );
+      } else {
+        fetchData(
+          ketTerima,
+          nextPageAct,
+          30,
+          optionfilter,
+          optionfiltertanggal,
+          tanggaldari,
+          tanggalsampai,
+          optionbulan,
+          optionTahun,
+          "filter",
+          ""
+        );
+      }
+
     } else {
-      fetchData(
+      const url = await printAllRequest(
         ketTerima,
-        nextPageAct,
-        30,
+        0,
+        0,
         optionfilter,
         optionfiltertanggal,
         tanggaldari,
         tanggalsampai,
         optionbulan,
         optionTahun,
-        "filter",
-        ""
+        pilihan
       );
+      setPdfUri(url);
+      setShowAlertInfoDownload(true)
     }
 
   };
@@ -577,7 +603,7 @@ export default function terimaScreen() {
             borderRadius: 5,
             marginRight: 8,
           }}
-          onPress={() => setModalVisible(true)}
+          onPress={() => { setStatusPrint(""), setModalVisible(true) }}
         >
           <MaterialCommunityIcons
             name="filter-variant"
@@ -594,7 +620,7 @@ export default function terimaScreen() {
             borderRadius: 5,
             marginRight: 8,
           }}
-          onPress={() => setModalVisible(true)}
+          onPress={() => { setStatusPrint("print"), setModalVisible(true) }}
         >
           <MaterialCommunityIcons name="printer" size={26} color="#fff" />
         </TouchableOpacity>
@@ -825,39 +851,39 @@ export default function terimaScreen() {
               <Text style={{ fontSize: 17, marginBottom: 5 }}>Berdasarkan</Text>
 
               {
-                  peritem == false ? (
-                    <View style={styles.pickerContainer}>
-                      <Picker
-                        selectedValue={optionfilter}
-                        style={styles.picker}
-                        onValueChange={(itemValue) => setoptionfilter(itemValue)}
-                      >
+                peritem == false ? (
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={optionfilter}
+                      style={styles.picker}
+                      onValueChange={(itemValue) => setoptionfilter(itemValue)}
+                    >
 
-                        <Picker.Item label="Nomor Invoice" value="Nomor Invoice" />
-                        <Picker.Item label="Nama Supplier" value="Nama Supplier" />
-                        <Picker.Item label="Gudang" value="Gudang" />
+                      <Picker.Item label="Nomor Invoice" value="Nomor Invoice" />
+                      <Picker.Item label="Nama Supplier" value="Nama Supplier" />
+                      <Picker.Item label="Gudang" value="Gudang" />
 
-                      </Picker>
-                    </View>
-                  ):(
-                    <View style={styles.pickerContainer}>
-                      <Picker
-                        selectedValue={optionfilter}
-                        style={styles.picker}
-                        onValueChange={(itemValue) => setoptionfilter(itemValue)}
-                      >
-                        <Picker.Item label="Nomor Invoice" value="Nomor Invoice" />
-                        <Picker.Item label="Kode Supplier" value="Kode Supplier" />
-                        <Picker.Item label="Nama Supplier" value="Nama Supplier" />
-                        <Picker.Item label="Gudang" value="Gudang" />
-                        <Picker.Item label="Kode Barang" value="Kode Barang" />
-                        <Picker.Item label="Nama Barang" value="Nama Barang" />
+                    </Picker>
+                  </View>
+                ) : (
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      selectedValue={optionfilter}
+                      style={styles.picker}
+                      onValueChange={(itemValue) => setoptionfilter(itemValue)}
+                    >
+                      <Picker.Item label="Nomor Invoice" value="Nomor Invoice" />
+                      <Picker.Item label="Kode Supplier" value="Kode Supplier" />
+                      <Picker.Item label="Nama Supplier" value="Nama Supplier" />
+                      <Picker.Item label="Gudang" value="Gudang" />
+                      <Picker.Item label="Kode Barang" value="Kode Barang" />
+                      <Picker.Item label="Nama Barang" value="Nama Barang" />
 
-                      </Picker>
-                    </View>
-                  )
+                    </Picker>
+                  </View>
+                )
               }
-              
+
 
               <View style={[styles.pickerContainer, { marginTop: 5 }]}>
                 <TextInput
@@ -867,6 +893,35 @@ export default function terimaScreen() {
                   onChangeText={setKetTerima}
                 />
               </View>
+
+              {
+                statusprint === "print" ? (<View style={[styles.pickerContainer, { marginTop: 5 }]}><View>
+                    <RadioButton.Group onValueChange={setPilihan} value={pilihan}>
+                        <RadioButton.Item label="Cash/Kredit" value="cash" />
+                        <RadioButton.Item label="Kredit" value="kredit" />
+                    </RadioButton.Group>
+                </View>
+                </View>) : ""
+            }
+
+            {
+              statusprint === "print" ? (
+                <View style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                backgroundColor: "#ffe1a020",
+                paddingHorizontal: 10,
+                paddingVertical: 3,
+                marginTop: 5,
+                borderRadius: 10,
+              }}>
+
+                <Text>Mencetak laporan dengan banyak data dapat menyebabkan terjadi smartphone lambat, jika ingin mencetak banyak data harap melakukan melalui aplikasi komputer.</Text>
+
+                </View>
+              ):""
+            }
             </View>
 
             <View
@@ -910,10 +965,38 @@ export default function terimaScreen() {
                   Tutup
                 </Text>
               </TouchableOpacity>
+
+               {pdfUri && (
+                    <>
+                        <View>
+                            <WebView
+                                source={{ uri: pdfUri }}
+                                originWhitelist={['*']}
+                                useWebKit
+                                javaScriptEnabled
+                            />
+                        </View>
+                    </>
+                )}
+
+
             </View>
           </View>
         </View>
       </Modal>
+
+      <CustomAlert
+            visible={showAlertInfoDownload}
+            title="Sukses!"
+            message="Laporan berhasil digenerate, jangan tutup pesan ini sebelum status download sukses"
+            icon={require('./../assets/images/success.png')}
+            onClose={() => { setPdfUri(null), setShowAlertInfoDownload(false) }}
+            onAcc={() => { }}
+            onDec={() => setShowAlertInfoDownload(false)}
+            option=""
+            textconfirmacc=""
+            textconfirmdec=""
+        />
     </View>
   );
 }

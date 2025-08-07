@@ -890,6 +890,23 @@ function orderScreen() {
                                 </View></View>) : ""
                             }
 
+                            {
+                                statusprint === "print" ? (
+                                    <View style={{
+                                        flexDirection: "row",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        backgroundColor: "#ffe1a020",
+                                        paddingHorizontal: 10,
+                                        paddingVertical: 3,
+                                        marginTop: 5,
+                                        borderRadius: 10,
+                                    }}>
+                                        <Text>Mencetak laporan dengan banyak data dapat menyebabkan terjadi smartphone lambat, jika ingin mencetak banyak data harap melakukan melalui aplikasi komputer.</Text>
+                                    </View>
+                                ) : ""
+                            }
+
                         </View>
 
                         <View
