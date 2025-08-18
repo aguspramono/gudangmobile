@@ -38,6 +38,9 @@ function Layout() {
       <Stack.Screen name="detailMutasiBarang" options={{ headerShown: false }} />
       <Stack.Screen name="closingPesananScreen" options={{ headerShown: false }} />
       <Stack.Screen name="detailClosingPesanan" options={{ headerShown: false }} />
+      <Stack.Screen name="closingOrderScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="detailClosingOrder" options={{ headerShown: false }} />
+      <Stack.Screen name="returPenerimaanScreen" options={{ headerShown: false }} />
       <Stack.Screen name="profileScreen" options={{ headerShown: false }} />
       <Stack.Screen name="menuScreen" options={{ headerShown: false }} />
 

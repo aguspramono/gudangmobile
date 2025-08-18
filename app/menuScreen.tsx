@@ -36,8 +36,8 @@ export default function HomeScreen() {
         { id: '3', label: 'Keluar', icon: 'exit-to-app', color: '#A0C4FF', count: -1 },
         { id: '4', label: 'Mutasi', icon: 'sync', color: '#A0C4FF', count: -1 },
         { id: '5', label: 'C. Pesan', icon: 'window-closed', color: '#A0C4FF', count: -1 },
-        // { id: '6', label: 'C. Order', icon: 'window-closed', color: '#A0C4FF', count: -1 },
-        // { id: '7', label: 'Retur', icon: 'keyboard-return', color: '#A0C4FF', count: -1 },
+        { id: '6', label: 'C. Order', icon: 'window-closed', color: '#A0C4FF', count: -1 },
+        { id: '7', label: 'Retur', icon: 'keyboard-return', color: '#A0C4FF', count: -1 },
         // { id: '8', label: 'Adjust', icon: 'adjust', color: '#A0C4FF', count: -1 },
         // { id: '9', label: 'Hutang', icon: 'cash-100', color: '#A0C4FF', count: -1 },
     ];
@@ -67,6 +67,10 @@ export default function HomeScreen() {
             router.navigate({ pathname: "mutasiScreen" });
         }else if (itemId == "5") {
             router.navigate({ pathname: "closingPesananScreen" });
+        }else if (itemId == "6") {
+            router.navigate({ pathname: "closingOrderScreen" });
+        }else if (itemId == "7") {
+            router.navigate({ pathname: "returPenerimaan" });
         }
         Animated.sequence([
             Animated.timing(scaleAnim, { toValue: 1.1, duration: 100, useNativeDriver: true }),
