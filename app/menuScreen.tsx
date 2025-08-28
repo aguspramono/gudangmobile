@@ -70,7 +70,7 @@ export default function HomeScreen() {
         }else if (itemId == "6") {
             router.navigate({ pathname: "closingOrderScreen" });
         }else if (itemId == "7") {
-            router.navigate({ pathname: "returPenerimaan" });
+            router.navigate({ pathname: "returPenerimaanScreen" });
         }
         Animated.sequence([
             Animated.timing(scaleAnim, { toValue: 1.1, duration: 100, useNativeDriver: true }),

@@ -63,9 +63,7 @@ export const getAllKeluarDetailRequestbyId = async (wherelike: string) => {
 
 
 export const printPesananRequest = async (kode:string) => {
- 
   return `${baseUrl}stockout/printlaporanbyid?nomorinv=${kode}`;
-   
 }
 
 export const printAllRequest = async (wherelike:string,pageprev:number,page:number,option:string,filter:string,tanggaldari:string,tanggalsampai:string,bulan:string,tahun:string,darigudang:string,kegudang:string) => {

@@ -49,9 +49,6 @@ export const deleteTokenNotifUser = async (data: FormData) => {
 };
 
 
-
-
-
 export const checkLogin = async () => {
   const token = await getToken();
   console.log(token);
