@@ -39,6 +39,11 @@ function returPenerimaanScreen() {
         useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
+    const [statusprint, setStatusPrint] = useState("");
+    const [pdfUri, setPdfUri] = useState(null);
+    const [showAlertInfoDownload, setShowAlertInfoDownload] = useState(false);
+    const [peritem, setPeritem] = useState(false);
+
     const showDatePickerDari = () => {
         setDatePickerVisibility(true);
     };
@@ -67,6 +72,10 @@ function returPenerimaanScreen() {
 
     const handlePressOrderBarang = (itemId) => {
         router.navigate({ pathname: "detailReturPenerimaan", params: { id: itemId } });
+    };
+
+    const handleDataPerItem = (status: string) => {
+        console.log(status)
     };
 
     const fetchData = async (
@@ -285,6 +294,47 @@ function returPenerimaanScreen() {
                         size={26}
                         color="#fff"
                     />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: "#0085c8",
+                        paddingHorizontal: 5,
+                        paddingVertical: 5,
+                        borderRadius: 5,
+                        marginRight: 8,
+                    }}
+                    onPress={() => { setStatusPrint("print"), setModalVisible(true) }}
+                >
+                    <MaterialCommunityIcons
+                        name="printer"
+                        size={26}
+                        color="#fff"
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={{
+                        backgroundColor: peritem == false ? "#ecececff" : "#0085c8",
+                        paddingHorizontal: 10,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignContent: "center",
+                        borderRadius: 5,
+                        marginRight: 8,
+                    }}
+                    onPress={() => {
+                        setPeritem(!peritem),
+                            peritem == false
+                                ? handleDataPerItem("")
+                                : handleDataPerItem("perItem");
+                    }}
+                >
+                    <Text style={{ color: peritem ? "#fff" : "#000" }}>
+                        {peritem == false
+                            ? "Lihat PerItem"
+                            : "Kembali PerRetur"}
+                    </Text>
                 </TouchableOpacity>
             </View>
 
