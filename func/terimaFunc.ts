@@ -42,6 +42,7 @@ export const getAllTerimaRequestbyId = async (wherelike:string) => {
   
       return response.data.dataStockPurch;
     } catch (error) {
+        console.log( `${baseUrl}stockpurch/detail?id=${wherelike}`)
         console.error("Error terima request:", error);
         throw error;
     }
@@ -57,6 +58,7 @@ export const getAllTerimaDetailRequestbyId = async (wherelike:string) => {
   
         return response.data.dataStockPurchDetail;
     } catch (error) {
+        console.log(`${baseUrl}stockpurchdetail/detail?id=${wherelike}`)
         console.error("Error terima request:", error);
         throw error;
     }

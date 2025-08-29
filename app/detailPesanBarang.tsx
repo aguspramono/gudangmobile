@@ -16,6 +16,7 @@ import CustomAlert from './../component/sweetalert';
 import { WebView } from 'react-native-webview';
 import { useShallow } from "zustand/react/shallow";
 import useLogin from "./../func/store/useUserLogin";
+import { formatNumber,DateFormat } from './../func/global/globalFunc';
 
 function detailPesanBarang() {
     const route = useRoute();
@@ -168,7 +169,7 @@ function detailPesanBarang() {
                 <View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text style={{ fontWeight: 'bold', color: "#585858" }}>K.Brg : {item.kodebarang}</Text>
-                        <Text style={{ color: "#585858", fontSize: 12 }}>Tgl. Butuh: {item.tglbutuh}</Text>
+                        <Text style={{ color: "#585858", fontSize: 12 }}>Tgl. Butuh: {DateFormat(item.tglbutuh,"dd/mm/yyyy")}</Text>
                     </View>
 
                     <View>
@@ -237,7 +238,7 @@ function detailPesanBarang() {
                         </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <Text>Tanggal</Text>
-                            <Text style={{ fontWeight: 'bold' }}>{item["Tgl"]}</Text>
+                            <Text style={{ fontWeight: 'bold' }}>{DateFormat(item["Tgl"],"dd/mm/yyyy")}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>

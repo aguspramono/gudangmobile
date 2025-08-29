@@ -22,10 +22,11 @@ import {
 import { router, useFocusEffect } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { DateFormat } from "./../func/global/globalFunc";
+import { formatNumber,DateFormat } from './../func/global/globalFunc';
 import { RadioButton } from 'react-native-paper';
 import { WebView } from 'react-native-webview';
 import CustomAlert from './../component/sweetalert';
+
 
 export default function terimaScreen() {
   const [terimabarang, setTerimaBarang] = useState<any[]>([]);
@@ -565,13 +566,13 @@ export default function terimaScreen() {
             <Text style={{ color: "#585858", fontSize: 12 }}>
               {"Qtty : " +
                 item.qtty +
-                " | Hrga : " + item.harga +
+                " | Hrga : " + formatNumber(item.harga) +
                 " | Disc : " +
                 item.disc +
                 " | PPN : " +
                 item.ppn +
                 " | Jmlh : " +
-                item.total}
+                formatNumber(item.total)}
             </Text>
           </View>
         </View>

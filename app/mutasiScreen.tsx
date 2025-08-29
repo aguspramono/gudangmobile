@@ -14,7 +14,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { getAllMutasiRequest, getAllMutasiItemRequest, printAllRequest } from "./../func/mutasiFunc";
-import { DateFormat } from "./../func/global/globalFunc";
+import { formatNumber,DateFormat } from './../func/global/globalFunc';
 import { Picker } from "@react-native-picker/picker";
 import { Optiongudang } from './../component/optiongudang';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -505,7 +505,7 @@ function mutasiScreen() {
                         >
                             <Text>Tgl : </Text>
                             <Text style={{ textAlign: "right" }}>
-                                {item.Tgl}
+                                {DateFormat(item.Tgl,"dd/mm/yyyy")}
                             </Text>
                         </View>
                         <View
@@ -571,7 +571,7 @@ function mutasiScreen() {
                         <Text style={{ color: "#585858", fontSize: 12 }}>
                             {"Qtty : " +
                                 item.Qtty +
-                                " | Harga : " + item.HargaJual}
+                                " | Harga : " + formatNumber(item.HargaJual)}
                         </Text>
                     </View>
                 </View>

@@ -16,6 +16,7 @@ import { Link, router } from "expo-router";
 import CustomAlert from './../component/sweetalert';
 import { WebView } from 'react-native-webview';
 import { getOrderRequestByID, getOrderDetailRequestByID,printPesananRequest } from './../func/orderFunc';
+import { formatNumber,DateFormat } from './../func/global/globalFunc';
 
 
 function detailOrderBarang() {
@@ -227,7 +228,7 @@ function detailOrderBarang() {
 
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#A0C4FF20', paddingHorizontal: 10, paddingVertical: 3, marginTop: 5, borderRadius: 10 }}>
                         <Text style={{ color: "#585858", fontSize: 12 }}>
-                            {"Qtty : " + item.qtybarang + " " + item.satuanbarang + " | Harga : " + item.hargabeliend + " | Disc : " + item.diskonbarang + " | Jmlh : " + item.jumlahbarang}
+                            {"Qtty : " + item.qtybarang + " " + item.satuanbarang + " | Harga : " + formatNumber(item.hargabeliend) + " | Disc : " + item.diskonbarang + " | Jmlh : " + formatNumber(item.jumlahbarang)}
                         </Text>
                     </View>
                 </View>
@@ -261,7 +262,7 @@ function detailOrderBarang() {
                     <View key={i} style={{ padding: 10, backgroundColor: '#A0C4FF20', borderRadius: 10 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <Text>Tanggal</Text>
-                            <Text style={{ fontWeight: 'bold' }}>{item["Tgl"]}</Text>
+                            <Text style={{ fontWeight: 'bold' }}>{DateFormat(item["Tgl"],"dd/mm/yyyy")}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
@@ -337,15 +338,15 @@ function detailOrderBarang() {
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
                         <Text>Nominal PPn</Text>
-                        <Text style={{ fontWeight: 'bold' }}>{ppnnominalgrand}</Text>
+                        <Text style={{ fontWeight: 'bold' }}>{formatNumber(ppnnominalgrand)}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
                         <Text>Nominal Disc</Text>
-                        <Text style={{ fontWeight: 'bold' }}>{diskonnominalgrand}</Text>
+                        <Text style={{ fontWeight: 'bold' }}>{formatNumber(diskonnominalgrand)}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
                         <Text>Grand Total</Text>
-                        <Text style={{ fontWeight: 'bold' }}>{grandtotalsum}</Text>
+                        <Text style={{ fontWeight: 'bold' }}>{formatNumber(grandtotalsum)}</Text>
                     </View>
                 </View>
             </View>

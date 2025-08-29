@@ -15,6 +15,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Link, router } from "expo-router";
 import CustomAlert from './../component/sweetalert';
 import { WebView } from 'react-native-webview';
+import { formatNumber,DateFormat } from './../func/global/globalFunc';
 import { getAllClosingPesananRequestByid, getAllClosingPesananDetailRequestByid,printPesananRequest } from './../func/closingPesananFunc';
 
 function detailClosingPesanan() {
@@ -86,7 +87,7 @@ function detailClosingPesanan() {
                 <View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text style={{ fontWeight: 'bold', color: "#585858" }}>No : {item.nomorpesanan}</Text>
-                        <Text style={{ fontWeight: 'bold', color: "#585858" }}>Tgl : {item.tanggal}</Text>
+                        <Text style={{ fontWeight: 'bold', color: "#585858" }}>Tgl : {DateFormat(item.tanggal,"dd/mm/yyyy")}</Text>
                     </View>
 
                     <View>

@@ -15,6 +15,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Link, router } from "expo-router";
 import CustomAlert from './../component/sweetalert';
 import { WebView } from 'react-native-webview';
+import { formatNumber,DateFormat } from './../func/global/globalFunc';
 import { getAllTerimaRequestbyId, getAllTerimaDetailRequestbyId,printPesananRequest } from './../func/terimaFunc';
 
 
@@ -293,11 +294,11 @@ function detailTerimaBarang() {
                         <Text style={{ color: "#585858", fontSize: 12 }}>
                             {"Qtty : " +
                                 item.qtty +" " + item.satuan +
-                                " | Hrga : " + item.harga +
+                                " | Hrga : " + formatNumber(item.harga) +
                                 " | Disc : " +
                                 item.disc +
                                 " | Jmlh : " +
-                                item.total}
+                               formatNumber(item.total)}
                         </Text>
                     </View>
                 </View>
@@ -322,7 +323,7 @@ function detailTerimaBarang() {
                     </Text>
                 </TouchableOpacity>
                 <View style={{ padding: 15, marginTop: 4 }}>
-                    <Text style={{ fontSize: 16, fontWeight: "bold" }}> Detail Order</Text>
+                    <Text style={{ fontSize: 16, fontWeight: "bold" }}> Detail Terima Barang</Text>
                 </View>
             </View>
 
@@ -331,7 +332,7 @@ function detailTerimaBarang() {
                     <View key={i} style={{ padding: 10, backgroundColor: '#A0C4FF20', borderRadius: 10 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <Text>Tanggal</Text>
-                            <Text style={{ fontWeight: 'bold' }}>{item["Tgl"]}</Text>
+                            <Text style={{ fontWeight: 'bold' }}>{DateFormat(item["Tgl"],"dd/mm/yyyy")}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
@@ -407,15 +408,15 @@ function detailTerimaBarang() {
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
                         <Text>Nominal PPn</Text>
-                        <Text style={{ fontWeight: 'bold' }}>{ppnnominalgrand}</Text>
+                        <Text style={{ fontWeight: 'bold' }}>{formatNumber(ppnnominalgrand)}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
                         <Text>Nominal Disc</Text>
-                        <Text style={{ fontWeight: 'bold' }}>{diskonnominalgrand}</Text>
+                        <Text style={{ fontWeight: 'bold' }}>{formatNumber(diskonnominalgrand)}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
                         <Text>Grand Total</Text>
-                        <Text style={{ fontWeight: 'bold' }}>{grandtotalsum}</Text>
+                        <Text style={{ fontWeight: 'bold' }}>{formatNumber(grandtotalsum)}</Text>
                     </View>
                 </View>
             </View>

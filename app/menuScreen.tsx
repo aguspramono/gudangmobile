@@ -39,7 +39,7 @@ export default function HomeScreen() {
         { id: '6', label: 'C. Order', icon: 'window-closed', color: '#A0C4FF', count: -1 },
         { id: '7', label: 'Retur', icon: 'keyboard-return', color: '#A0C4FF', count: -1 },
         // { id: '8', label: 'Adjust', icon: 'adjust', color: '#A0C4FF', count: -1 },
-        // { id: '9', label: 'Hutang', icon: 'cash-100', color: '#A0C4FF', count: -1 },
+         { id: '9', label: 'Hutang', icon: 'cash-100', color: '#A0C4FF', count: -1 },
     ];
 
     const master = [

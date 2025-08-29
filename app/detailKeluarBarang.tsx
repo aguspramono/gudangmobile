@@ -15,6 +15,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Link, router } from "expo-router";
 import CustomAlert from './../component/sweetalert';
 import { WebView } from 'react-native-webview';
+import { formatNumber,DateFormat } from './../func/global/globalFunc';
 import { getAllKeluarRequestbyId, getAllKeluarDetailRequestbyId, printPesananRequest } from './../func/keluarFunc';
 
 function detailKeluarBarang() {
@@ -167,7 +168,7 @@ function detailKeluarBarang() {
                     <View key={i} style={{ padding: 10, backgroundColor: '#A0C4FF20', borderRadius: 10 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <Text>Tanggal</Text>
-                            <Text style={{ fontWeight: 'bold' }}>{item["Tgl"]}</Text>
+                            <Text style={{ fontWeight: 'bold' }}>{DateFormat(item["Tgl"],"dd/mm/yyyy")}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>

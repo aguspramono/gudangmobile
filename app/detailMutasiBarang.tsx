@@ -15,6 +15,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Link, router } from "expo-router";
 import CustomAlert from './../component/sweetalert';
 import { WebView } from 'react-native-webview';
+import { formatNumber,DateFormat } from './../func/global/globalFunc';
 import { getAllMutasiRequestbyId, getAllMutasiDetailRequestbyId,printPesananRequest } from './../func/mutasiFunc';
 
 function detailMutasiBarang() {
@@ -93,7 +94,7 @@ function detailMutasiBarang() {
                 <View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text style={{ fontWeight: 'bold', color: "#585858" }}>NoInv : {item.noinv}</Text>
-                        <Text style={{ color: "#585858", fontSize: 12 }}>Tgl: {item.tanggal}</Text>
+                        <Text style={{ color: "#585858", fontSize: 12 }}>Tgl: {DateFormat(item.tanggal,"dd/mm/yyyy")}</Text>
                     </View>
 
                     <View>
@@ -144,7 +145,7 @@ function detailMutasiBarang() {
                     <View key={i} style={{ padding: 10, backgroundColor: '#A0C4FF20', borderRadius: 10 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <Text>Tanggal</Text>
-                            <Text style={{ fontWeight: 'bold' }}>{item["Tgl"]}</Text>
+                            <Text style={{ fontWeight: 'bold' }}>{DateFormat(item["Tgl"],"dd/mm/yyyy")}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>

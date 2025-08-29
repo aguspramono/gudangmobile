@@ -13,11 +13,14 @@ import {
 } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { getAllReturPenerimaanRequest } from "./../func/returPenerimaan";
-import { DateFormat } from "./../func/global/globalFunc";
+import { getAllReturPenerimaanRequest, getAllReturPerItemRequest, printReturAllRequest } from "./../func/returPenerimaan";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { router, useFocusEffect } from "expo-router";
+import { RadioButton } from 'react-native-paper';
+import { formatNumber, DateFormat } from './../func/global/globalFunc';
+import { WebView } from 'react-native-webview';
+import CustomAlert from './../component/sweetalert';
 
 function returPenerimaanScreen() {
 
@@ -43,6 +46,9 @@ function returPenerimaanScreen() {
     const [pdfUri, setPdfUri] = useState(null);
     const [showAlertInfoDownload, setShowAlertInfoDownload] = useState(false);
     const [peritem, setPeritem] = useState(false);
+
+    const [lastStatusReq, setLastStatusReq] = useState("");
+    const [pembayaran, setPembayaran] = useState("");
 
     const showDatePickerDari = () => {
         setDatePickerVisibility(true);
@@ -75,7 +81,38 @@ function returPenerimaanScreen() {
     };
 
     const handleDataPerItem = (status: string) => {
-        console.log(status)
+        if (status == "perItem") {
+            fetchData(
+                "",
+                0,
+                30,
+                "Nomor Invoice",
+                "Semua",
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                "",
+                "",
+                "",
+            );
+        } else {
+
+            fetchData(
+                "",
+                0,
+                30,
+                "Nomor Invoice",
+                "Semua",
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                "",
+                "perItem",
+                "",
+            );
+        }
     };
 
     const fetchData = async (
@@ -88,42 +125,82 @@ function returPenerimaanScreen() {
         tanggalsampai: string,
         bulan: string,
         tahun: string,
-        setReq: string
+        setReq: string,
+        statusReq: string,
+        pembayaranReq: string
     ) => {
         const returitem = [];
-        const response = await getAllReturPenerimaanRequest(
-            like,
-            limitqueryprev,
-            limitquery,
-            option,
-            filter,
-            tanggaldari,
-            tanggalsampai,
-            bulan,
-            tahun
-        );
 
-        response.map((item, i) =>
-            returitem.push({
-                id: item.NoRetur + page + i,
-                nomorretur: item.NoRetur,
-                detail: item.Qtty + " item retur",
-                tanggal: item.Tanggal
-            })
-        );
+        if (statusReq !== lastStatusReq) {
+            setReturPenerimaan([]);
+        }
 
-        if (setReq === "filter") {
+        if (statusReq === "perItem") {
+            const response = await getAllReturPerItemRequest(
+                option,
+                like,
+                pembayaranReq,
+                filter,
+                tanggaldari,
+                tanggalsampai,
+                bulan,
+                tahun,
+                limitqueryprev,
+                limitquery
+            );
+
+            response.map((item, i) =>
+                returitem.push({
+                    id: item.NoRetur + item.InvNum + page + i + "peritem",
+                    Tgl: item.Tgl,
+                    ReNum: item.ReNum,
+                    InvNum: item.InvNum,
+                    Nama: item.Nama,
+                    NamaBrg: item.NamaBrg,
+                    Qtty: item.Qtty,
+                    Harga: item.Harga,
+                    jumlahtotal: item.jumlahtotal,
+                })
+            );
+
+        } else {
+
+            const response = await getAllReturPenerimaanRequest(
+                like,
+                limitqueryprev,
+                limitquery,
+                option,
+                filter,
+                tanggaldari,
+                tanggalsampai,
+                bulan,
+                tahun
+            );
+
+            response.map((item, i) =>
+                returitem.push({
+                    id: item.NoRetur + page + i,
+                    nomorretur: item.NoRetur,
+                    detail: item.Qtty + " item retur",
+                    tanggal: item.Tanggal
+                })
+            );
+        }
+
+        if (setReq === "filter" || statusReq !== lastStatusReq) {
             setReturPenerimaan(returitem);
         } else {
             setReturPenerimaan([...returpenerimaan, ...returitem]);
         }
+
+        setLastStatusReq(statusReq);
     };
 
 
     let limitPage = 0;
     let nextPageAct = 0;
 
-    const nextPage = async () => {
+    const nextPage = async (statusReq: string) => {
 
         let tanggaldari = "2025-07-07";
         let tanggalsampai = "2025-07-07";
@@ -132,8 +209,46 @@ function returPenerimaanScreen() {
             tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
-        const response = await getAllReturPenerimaanRequest(ketretur, 0, 0, optionfilter, optionfiltertanggal, tanggaldari, tanggalsampai, optionbulan, optionTahun);
-        limitPage = Math.ceil(response.length / 10);
+
+        let jumlahdataresponse = 0;
+
+        if (statusReq == "perItem") {
+
+            const response = await getAllReturPerItemRequest(
+                optionfilter,
+                ketretur,
+                pembayaran,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                0,
+                0
+            );
+
+            jumlahdataresponse = response.length;
+
+        } else {
+
+            const response = await getAllReturPenerimaanRequest(
+                ketretur,
+                0,
+                0,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun
+            );
+
+            jumlahdataresponse = response.length;
+
+        }
+
+
+        limitPage = Math.ceil(jumlahdataresponse / 10);
 
         if (page >= limitPage) {
             setPage(limitPage);
@@ -144,26 +259,51 @@ function returPenerimaanScreen() {
         nextPageAct = limitQuery + 30;
         setLimitQuery(nextPageAct);
 
-        if (nextPageAct >= response.length) {
-            nextPageAct = response.length;
+        if (nextPageAct >= jumlahdataresponse) {
+            nextPageAct = jumlahdataresponse;
             setLimitQuery(nextPageAct);
         }
 
-        fetchData(
-            ketretur,
-            nextPageAct,
-            30,
-            optionfilter,
-            optionfiltertanggal,
-            tanggaldari,
-            tanggalsampai,
-            optionbulan,
-            optionTahun,
-            ""
-        );
+        if (statusReq == "perItem") {
+
+            fetchData(
+                ketretur,
+                nextPageAct,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                "",
+                "perItem",
+                pembayaran
+            );
+
+        } else {
+
+            fetchData(
+                ketretur,
+                nextPageAct,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                "",
+                "",
+                pembayaran
+            );
+
+        }
+
+
     };
 
-    const resetAndFetch = () => {
+    const resetAndFetch = async (statusReq: string) => {
         let tanggaldari = "2025-07-07";
         let tanggalsampai = "2025-07-07";
 
@@ -171,34 +311,104 @@ function returPenerimaanScreen() {
             tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
-        fetchData(
-            ketretur,
-            nextPageAct,
-            30,
-            optionfilter,
-            optionfiltertanggal,
-            tanggaldari,
-            tanggalsampai,
-            optionbulan,
-            optionTahun,
-            "filter"
-        );
+
+        if (statusprint === "") {
+
+            if (statusReq == "perItem") {
+
+                fetchData(
+                    ketretur,
+                    nextPageAct,
+                    30,
+                    optionfilter,
+                    optionfiltertanggal,
+                    tanggaldari,
+                    tanggalsampai,
+                    optionbulan,
+                    optionTahun,
+                    "filter",
+                    "perItem",
+                    pembayaran
+                );
+
+            } else {
+                fetchData(
+                    ketretur,
+                    nextPageAct,
+                    30,
+                    optionfilter,
+                    optionfiltertanggal,
+                    tanggaldari,
+                    tanggalsampai,
+                    optionbulan,
+                    optionTahun,
+                    "filter",
+                    "",
+                    pembayaran
+                );
+            }
+
+        } else {
+
+            const url = await printReturAllRequest(
+                optionfilter,
+                ketretur,
+                pembayaran,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                0,
+                0
+            );
+            setPdfUri(url);
+            setShowAlertInfoDownload(true)
+
+        }
+
+
     };
 
-    const onRefresh = useCallback(() => {
+    const onRefresh = useCallback((statusReq: string) => {
         setRefreshing(true);
-        fetchData(
-            ketretur,
-            0,
-            30,
-            optionfilter,
-            optionfiltertanggal,
-            "2025-01-01",
-            "2025-12-31",
-            optionbulan,
-            optionTahun,
-            '',
-        );
+
+        if (statusReq == "perItem") {
+
+            fetchData(
+                ketretur,
+                0,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                '',
+                'perItem',
+                pembayaran
+            );
+
+        } else {
+
+            fetchData(
+                ketretur,
+                0,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                '',
+                '',
+                pembayaran
+            );
+
+        }
+
         setTimeout(() => {
             setRefreshing(false);
         }, 2000);
@@ -216,6 +426,8 @@ function returPenerimaanScreen() {
             optionbulan,
             optionTahun,
             '',
+            '',
+            pembayaran
         );
     }, []);
 
@@ -263,6 +475,121 @@ function returPenerimaanScreen() {
     };
 
 
+    const renderReturPenerimaanItem = ({ item }) => {
+
+        return (
+            <TouchableOpacity
+                style={{
+                    marginTop: 8,
+                    paddingVertical: 10,
+                    paddingHorizontal: 15,
+                    borderRadius: 15,
+                    backgroundColor: "#fff",
+                }}
+                onPress={() => console.log(item.ReNum)}
+            >
+                <View>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
+                    >
+                        <Text style={{ fontWeight: "bold", color: "#585858" }}>
+                            Nomor Retur : {item.ReNum}
+                        </Text>
+                    </View>
+
+                    <View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                paddingVertical: 5,
+                                borderBottomWidth: 0.3,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Invoice : </Text>
+                            <Text style={{ width: 270, textAlign: "right" }}>
+                                {item.InvNum}
+                            </Text>
+                        </View>
+
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                paddingVertical: 5,
+                                borderBottomWidth: 0.3,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Tgl : </Text>
+                            <Text style={{ width: 270, textAlign: "right" }}>
+                                {DateFormat(item.Tgl, "dd/mm/yyyy")}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Supplier : </Text>
+                            <Text style={{ width: 150, textAlign: "right" }}>
+                                {item.Nama}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Deskripsi : </Text>
+                            <Text style={{ width: 270, textAlign: "right" }}>
+                                {item.NamaBrg}
+                            </Text>
+                        </View>
+                    </View>
+
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            backgroundColor: "#A0C4FF20",
+                            paddingHorizontal: 10,
+                            paddingVertical: 3,
+                            marginTop: 5,
+                            borderRadius: 10,
+                        }}
+                    >
+                        <Text style={{ color: "#585858", fontSize: 12 }}>
+                            {"Qtty : " +
+                                item.Qtty +
+                                " | Harga : " + formatNumber(item.Harga) +
+                                " | Jumlah : " + formatNumber(item.jumlahtotal)}
+                        </Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+        );
+    };
+
+
     return (
         <View style={styles.container}>
 
@@ -287,7 +614,7 @@ function returPenerimaanScreen() {
                         borderRadius: 5,
                         marginRight: 8,
                     }}
-                    onPress={() => setModalVisible(true)}
+                    onPress={() => { setStatusPrint(""), setModalVisible(true) }}
                 >
                     <MaterialCommunityIcons
                         name="filter-variant"
@@ -341,17 +668,19 @@ function returPenerimaanScreen() {
             <View>
                 <FlatList
                     data={returpenerimaan}
-                    renderItem={renderReturPenerimaan}
+                    renderItem={peritem == false ? renderReturPenerimaan : renderReturPenerimaanItem}
                     keyExtractor={(item) => item.id}
                     onEndReached={() => {
-                        nextPage();
+                        peritem == false ? nextPage("") : nextPage("perItem");
                     }}
                     onEndReachedThreshold={0.5}
                     ListFooterComponent={loading && <ActivityIndicator size="large" />}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
-                            onRefresh={onRefresh}
+                            onRefresh={() => {
+                                peritem == false ? onRefresh("") : onRefresh("perItem");
+                            }}
                             colors={["#9Bd35A", "#689F38"]}
                         />
                     }
@@ -533,16 +862,32 @@ function returPenerimaanScreen() {
 
                         <View style={{ marginTop: 10 }}>
                             <Text style={{ fontSize: 17, marginBottom: 5 }}>Berdasarkan</Text>
-                            <View style={styles.pickerContainer}>
-                                <Picker
-                                    selectedValue={optionfilter}
-                                    style={styles.picker}
-                                    onValueChange={(itemValue) => setoptionfilter(itemValue)}
-                                >
-                                    <Picker.Item label="Nomor Retur" value="Nomor Retur" />
-                                    <Picker.Item label="Supplier" value="Supplier" />
-                                </Picker>
-                            </View>
+
+                            {
+                                peritem == false && statusprint == "" ? (<View style={styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={optionfilter}
+                                        style={styles.picker}
+                                        onValueChange={(itemValue) => setoptionfilter(itemValue)}
+                                    >
+                                        <Picker.Item label="Nomor Retur" value="Nomor Retur" />
+                                        <Picker.Item label="Supplier" value="Supplier" />
+                                    </Picker>
+                                </View>) : (<View style={styles.pickerContainer}>
+                                    <Picker
+                                        selectedValue={optionfilter}
+                                        style={styles.picker}
+                                        onValueChange={(itemValue) => setoptionfilter(itemValue)}
+                                    >
+                                        <Picker.Item label="Nomor Retur" value="Nomor Retur" />
+                                        <Picker.Item label="Nomor Invoice" value="Nomor Invoice" />
+                                        <Picker.Item label="Kode Supplier" value="Kode Supplier" />
+                                        <Picker.Item label="Nama Supplier" value="Nama Supplier" />
+                                        <Picker.Item label="Kode Barang" value="Kode Barang" />
+                                        <Picker.Item label="Nama Barang" value="Nama Barang" />
+                                    </Picker>
+                                </View>)
+                            }
 
                             <View style={[styles.pickerContainer, { marginTop: 5 }]}>
                                 <TextInput
@@ -552,6 +897,34 @@ function returPenerimaanScreen() {
                                     onChangeText={setKetRetur}
                                 />
                             </View>
+
+
+                            {
+                                peritem == false && statusprint == "" ? ("") : (<View style={[styles.pickerContainer, { marginTop: 5 }]}><View>
+                                    <RadioButton.Group onValueChange={setPembayaran} value={pembayaran}>
+                                        <RadioButton.Item label="Semua" value="semua" />
+                                        <RadioButton.Item label="Cash" value="cash" />
+                                        <RadioButton.Item label="Kredit" value="kredit" />
+                                    </RadioButton.Group>
+                                </View></View>)
+                            }
+
+                            {
+                                statusprint === "print" ? (
+                                    <View style={{
+                                        flexDirection: "row",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        backgroundColor: "#ffe1a020",
+                                        paddingHorizontal: 10,
+                                        paddingVertical: 3,
+                                        marginTop: 5,
+                                        borderRadius: 10,
+                                    }}>
+                                        <Text>Mencetak laporan dengan banyak data dapat menyebabkan terjadi smartphone lambat, jika ingin mencetak banyak data harap melakukan melalui aplikasi komputer.</Text>
+                                    </View>
+                                ) : ""
+                            }
                         </View>
 
                         <View
@@ -559,7 +932,7 @@ function returPenerimaanScreen() {
                         >
                             <TouchableOpacity
                                 onPress={() => {
-                                    resetAndFetch()
+                                    peritem == false ? resetAndFetch("") : resetAndFetch("perItem");
                                 }}
                                 style={{
                                     flex: 1,
@@ -593,11 +966,36 @@ function returPenerimaanScreen() {
                                 <Text style={[styles.buttonTextrt, { fontSize: 17 }]}>
                                     Tutup
                                 </Text>
+
+                                {pdfUri && (
+                                    <>
+                                        <View>
+                                            <WebView
+                                                source={{ uri: pdfUri }}
+                                                originWhitelist={['*']}
+                                                useWebKit
+                                                javaScriptEnabled
+                                            />
+                                        </View>
+                                    </>
+                                )}
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             </Modal>
+            <CustomAlert
+                visible={showAlertInfoDownload}
+                title="Sukses!"
+                message="Laporan berhasil digenerate, jangan tutup pesan ini sebelum status download sukses"
+                icon={require('./../assets/images/success.png')}
+                onClose={() => { setPdfUri(null), setShowAlertInfoDownload(false) }}
+                onAcc={() => { }}
+                onDec={() => setShowAlertInfoDownload(false)}
+                option=""
+                textconfirmacc=""
+                textconfirmdec=""
+            />
         </View>
 
     );

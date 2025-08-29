@@ -16,6 +16,7 @@ import { Link, router } from "expo-router";
 import CustomAlert from './../component/sweetalert';
 import { WebView } from 'react-native-webview';
 import { getReturRequestByID, getReturDetailRequestByID,printPesananRequest } from './../func/returPenerimaan';
+import { formatNumber,DateFormat } from './../func/global/globalFunc';
 
 function detailReturPenerimaan() {
     const route = useRoute();
@@ -127,7 +128,7 @@ function detailReturPenerimaan() {
 
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#A0C4FF20', paddingHorizontal: 10, paddingVertical: 3, marginTop: 5, borderRadius: 10 }}>
                         <Text style={{ color: "#585858", fontSize: 12 }}>
-                            {"Qtty : " + item.qtybarang + " | Harga : " + item.harga + " | Disc % : " + item.disc + " | Nominal Disc : " + item.nominaldisc + " | xDisc : " + item.xdisc + " | PPn : " + item.ppn + " | Nominal PPn : " + item.nominalppn + " | Jumlah Rp : " + item.jumlahrp}
+                            {"Qtty : " + item.qtybarang + " | Harga : " + formatNumber(item.harga) + " | Disc % : " + item.disc + " | Nominal Disc : " + formatNumber(item.nominaldisc) + " | xDisc : " + item.xdisc + " | PPn : " + item.ppn + " | Nominal PPn : " + formatNumber(item.nominalppn) + " | Jumlah Rp : " + formatNumber(item.jumlahrp)}
                         </Text>
                     </View>
                 </View>
@@ -161,7 +162,7 @@ function detailReturPenerimaan() {
                     <View key={i} style={{ padding: 10, backgroundColor: '#A0C4FF20', borderRadius: 10 }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <Text>Tanggal</Text>
-                            <Text style={{ fontWeight: 'bold' }}>{item["Tgl"]}</Text>
+                            <Text style={{ fontWeight: 'bold' }}>{DateFormat(item["Tgl"],"dd/mm/yyyy")}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>

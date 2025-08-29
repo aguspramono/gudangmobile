@@ -20,7 +20,7 @@ import {
 import { router, useFocusEffect } from "expo-router";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { DateFormat } from "./../func/global/globalFunc";
+import { formatNumber,DateFormat } from './../func/global/globalFunc';
 import CustomAlert from './../component/sweetalert';
 import { WebView } from 'react-native-webview';
 import { Optiongudang } from './../component/optiongudang';
@@ -623,7 +623,7 @@ function keluarScreen() {
                         <Text style={{ color: "#585858", fontSize: 12 }}>
                             {"Qtty : " +
                                 item.Qtty +
-                                " | Harga : " + item.Harga}
+                                " | Harga : " + formatNumber(item.Harga)}
                         </Text>
                     </View>
                 </View>
