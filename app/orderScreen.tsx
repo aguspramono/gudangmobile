@@ -78,6 +78,7 @@ function orderScreen() {
     };
 
     const handleDataPerItem = (status: string) => {
+        setoptionfiltertanggal("Semua");
         if (status == "perItem") {
             fetchData(
                 "",
@@ -638,7 +639,7 @@ function orderScreen() {
                     <Text style={{ color: peritem ? "#fff" : "#000" }}>
                         {peritem == false
                             ? "Lihat PerItem"
-                            : "Kembali PerPO"}
+                            : "Kembali PerGroup"}
                     </Text>
                 </TouchableOpacity>
             </View>

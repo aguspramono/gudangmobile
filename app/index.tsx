@@ -50,9 +50,15 @@ function Splash() {
             Alert.alert(response["message"]);
             router.navigate("/");
           } else {
+
+            if(response.datauser[0]["tokenNotif"]==="" || response.datauser[0]["tokenNotif"]==null){
+              Alert.alert("Gagal","Terjadi kesalahan saat memuat data, harap login kembali");
+              router.navigate("/");
+            }
             setNamaUser(response.datauser[0]["NamaPeg"]);
             setUserName(response.datauser[0]["Username"]);
             setLogin(true);
+
           }
         })
         .catch(error => {

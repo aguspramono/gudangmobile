@@ -385,6 +385,7 @@ export default function terimaScreen() {
   }, []);
 
   const handleDataPerItem = (status: string) => {
+    setoptionfiltertanggal("Semua");
     //console.log(!peritem)
     if (status == "perItem") {
       fetchData(
@@ -646,7 +647,7 @@ export default function terimaScreen() {
           <Text style={{ color: peritem ? "#fff" : "#000" }}>
             Lihat  {peritem == false
               ? "PerItem"
-              : "PerInvoice"}
+              : "PerGroup"}
           </Text>
         </TouchableOpacity>
       </View>

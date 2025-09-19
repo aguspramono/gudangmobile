@@ -87,6 +87,7 @@ function mutasiScreen() {
     };
 
     const handleDataPerItem = (status: string) => {
+        setoptionfiltertanggal("Semua");
         if (status == "perItem") {
             fetchData(
                 "",
@@ -649,7 +650,7 @@ function mutasiScreen() {
                     <Text style={{ color: peritem ? "#fff" : "#000" }}>
                         {peritem == false
                             ? "Lihat PerItem"
-                            : "Kembali PerNomor Bukti"}
+                            : "Kembali PerGroup"}
                     </Text>
                 </TouchableOpacity>
             </View>

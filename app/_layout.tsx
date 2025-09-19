@@ -43,6 +43,8 @@ function Layout() {
       <Stack.Screen name="returPenerimaanScreen" options={{ headerShown: false }} />
       <Stack.Screen name="detailReturPenerimaan" options={{ headerShown: false }} />
       <Stack.Screen name="hutangScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="hutangBayarScreen" options={{ headerShown: false }} />
+      <Stack.Screen name="detailHutang" options={{ headerShown: false }} />
       <Stack.Screen name="profileScreen" options={{ headerShown: false }} />
       <Stack.Screen name="menuScreen" options={{ headerShown: false }} />
       <Stack.Screen name="kasirscreen" options={{ headerShown: false }} />

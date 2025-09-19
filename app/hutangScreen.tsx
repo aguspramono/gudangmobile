@@ -9,12 +9,14 @@ import {
     Modal,
     TouchableWithoutFeedback,
     Platform,
-    TextInput
+    TextInput,
+    Alert,
+    ScrollView
 } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { getAllData } from "./../func/lunasHutangFunc";
-import { DateFormat } from "../func/global/globalFunc";
+import { getAllData, getAllDataItem, PrntAllDataItem } from "./../func/lunasHutangFunc";
+import { formatNumber, DateFormat } from './../func/global/globalFunc';
 import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { router, useFocusEffect } from "expo-router";
@@ -28,11 +30,16 @@ function hutangScreen() {
     const [hutang, setHutang] = useState<any[]>([]);
     const [page, setPage] = useState(0);
     const [kethutang, setKetHutang] = useState("");
+    const [peritem, setPeritem] = useState(false);
     const [optionfilter, setoptionfilter] = useState("Nomor Bukti");
     const [optionfiltertanggal, setoptionfiltertanggal] = useState("Semua");
     const [optionbulan, setOptionBulan] = useState("Bulan");
     const [optionTahun, setOptionTahun] = useState("Tahun");
-    const [pilihan, setPilihan] = useState("belum");
+    const [pembayaranval, setPembayaranVal] = useState("semua");
+    const [opsiqueryval, setOpsiQuery] = useState("");
+    const [opsival, setOpsiVal] = useState("semua");
+
+
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDateSampai, setSelectedDateSampai] = useState(null);
     const [limitQuery, setLimitQuery] = useState(0);
@@ -43,7 +50,7 @@ function hutangScreen() {
     const [isDatePickerVisibleSampai, setDatePickerVisibilitySampai] =
         useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-    const [peritem, setPeritem] = useState(false);
+
     const [lastStatusReq, setLastStatusReq] = useState("");
     const [statusprint, setStatusPrint] = useState("");
     const [pdfUri, setPdfUri] = useState(null);
@@ -82,34 +89,45 @@ function hutangScreen() {
 
 
     const handleDataPerItem = (status: string) => {
+        setoptionfiltertanggal("Semua");
+        setOpsiQuery("Semua");
         if (status == "perItem") {
-            // fetchData(
-            //     "",
-            //     0,
-            //     30,
-            //     "Nomor PO",
-            //     "Semua",
-            //     "2025-01-01",
-            //     "2025-12-31",
-            //     optionbulan,
-            //     optionTahun,
-            //     "",
-            //     "",
-            // );
+            fetchData(
+                "",
+                0,
+                30,
+                "Nomor PO",
+                "Semua",
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                "",
+                "",
+                pembayaranval,
+                opsiqueryval,
+                opsival
+            );
+
+            setoptionfilter("Nomor Invoice");
         } else {
-            // fetchData(
-            //     "",
-            //     0,
-            //     30,
-            //     "Nomor PO",
-            //     "Semua",
-            //     "2025-01-01",
-            //     "2025-12-31",
-            //     optionbulan,
-            //     optionTahun,
-            //     "",
-            //     "perItem"
-            // );
+            fetchData(
+                "",
+                0,
+                30,
+                "Nomor PO",
+                "Semua",
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                "",
+                "perItem",
+                "",
+                "",
+                ""
+            );
+            setoptionfilter("Nomor Bukti");
         }
     };
 
@@ -125,7 +143,10 @@ function hutangScreen() {
         bulan: string,
         tahun: string,
         setReq: string,
-        statusReq: string
+        statusReq: string,
+        pembayaran: string,
+        opsiquery: string,
+        opsi: string
     ) => {
         const hutangitem = [];
         if (statusReq !== lastStatusReq) {
@@ -133,33 +154,48 @@ function hutangScreen() {
         }
 
         if (statusReq === "perItem") {
+            //optionlike:string,like:string,pembayaran:string,opsiquery:string,tanggaldari:string,tanggalsampai:string,opsi:string,pageprev:number,page:number
+            const response = await getAllDataItem(
+                option,
+                like,
+                pembayaran,
+                opsiquery,
+                tanggaldari,
+                tanggalsampai,
+                opsi,
+                limitqueryprev,
+                limitquery
+            );
 
-            // const response = await getAllOrderItemRequest(
-            //     like,
-            //     limitqueryprev,
-            //     limitquery,
-            //     option,
-            //     filter,
-            //     tanggaldari,
-            //     tanggalsampai,
-            //     bulan,
-            //     tahun
-            // );
+            response.forEach((item, i) => {
+                const harga = Number(item.Harga) || 0;
+                const disc = Number(item.Disc) || 0;
+                const ppn = Number(item.PPn) || 0;
+                const nominalDisc = Number(item.NominalDisc) || 0;
+                const nominalPPn = Number(item.NominalPPn) || 0;
 
-            // response.map((item, i) =>
-            //     orderbarangitem.push({
-            //         id: item.NoPo + page + i + "peritem",
-            //         nomorpesanan: item.NoPesanan,
-            //         tanggal: item.Tanggal,
-            //         nopo: item.NoPo,
-            //         departemen: item.Departemen,
-            //         supplier: item.Supplier,
-            //         tglclosing: item.TglClosing,
-            //         nama: item.Nama,
-            //         qtypo: item.QtyPO,
-            //         qtybeli: item.QtyBeli,
-            //     })
-            // );
+                const hargadisc = harga - (harga * disc) / 100;
+                const hargappn = hargadisc + (hargadisc * ppn) / 100;
+                const totalseluruh = hargappn + nominalPPn - nominalDisc;
+
+                hutangitem.push({
+                    id: item.InvNum + page + i + "peritem",
+                    sNo_Acc: item.sNo_Acc,
+                    Nama: item.Nama,
+                    Alamat: item.Alamat,
+                    Tgl: item.Tgl,
+                    InvNum: item.InvNum,
+                    Disc: disc,
+                    PPn: ppn,
+                    TglJT: item.TglJT,
+                    TglLunas: item.TglLunas,
+                    NominalDisc: nominalDisc,
+                    NominalPPn: nominalPPn,
+                    Harga: harga,
+                    Bayar: item.Bayar,
+                    Total: totalseluruh, // saya tambahkan biar hasil perhitungan bisa dipakai
+                });
+            });
         } else {
 
             const response = await getAllData(
@@ -220,7 +256,21 @@ function hutangScreen() {
             //     optionbulan,
             //     optionTahun
             // );
-            // jumlahdataresponse = response.length;
+
+            const response = await getAllDataItem(
+                optionfilter,
+                kethutang,
+                pembayaranval,
+                opsiqueryval,
+                tanggaldari,
+                tanggalsampai,
+                opsival,
+                0,
+                0
+            );
+
+            jumlahdataresponse = response.length;
+
         } else {
             const response = await getAllData(
                 kethutang,
@@ -251,19 +301,22 @@ function hutangScreen() {
         }
 
         if (statusReq == "perItem") {
-            // fetchData(
-            //     kethutang,
-            //     nextPageAct,
-            //     30,
-            //     optionfilter,
-            //     optionfiltertanggal,
-            //     tanggaldari,
-            //     tanggalsampai,
-            //     optionbulan,
-            //     optionTahun,
-            //     "",
-            //     "perItem"
-            // );
+            fetchData(
+                kethutang,
+                nextPageAct,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                tanggaldari,
+                tanggalsampai,
+                optionbulan,
+                optionTahun,
+                "",
+                "perItem",
+                pembayaranval,
+                opsiqueryval,
+                opsival
+            );
 
         } else {
 
@@ -278,6 +331,9 @@ function hutangScreen() {
                 optionbulan,
                 optionTahun,
                 "",
+                "",
+                "",
+                "",
                 ""
             );
         }
@@ -287,27 +343,29 @@ function hutangScreen() {
     const resetAndFetch = async (statusReq: string) => {
         let tanggaldari = "2025-07-07";
         let tanggalsampai = "2025-07-07";
-
-        if (optionfiltertanggal === "Tanggal") {
+        if (optionfiltertanggal === "Tanggal" || opsiqueryval == "TGL TRANSAKSI" || opsiqueryval == "TGL J.T TRANSAKSI" || opsiqueryval == "TGL PELUNASAN") {
             tanggaldari = DateFormat(selectedDate, "yyyy-mm-dd");
             tanggalsampai = DateFormat(selectedDateSampai, "yyyy-mm-dd");
         }
         if (statusprint === "") {
             if (statusReq === "perItem") {
 
-                // fetchData(
-                //     kethutang,
-                //     nextPageAct,
-                //     30,
-                //     optionfilter,
-                //     optionfiltertanggal,
-                //     tanggaldari,
-                //     tanggalsampai,
-                //     optionbulan,
-                //     optionTahun,
-                //     "filter",
-                //     "perItem"
-                // );
+                fetchData(
+                    kethutang,
+                    nextPageAct,
+                    30,
+                    optionfilter,
+                    optionfiltertanggal,
+                    tanggaldari,
+                    tanggalsampai,
+                    optionbulan,
+                    optionTahun,
+                    "filter",
+                    "perItem",
+                    pembayaranval,
+                    opsiqueryval,
+                    opsival
+                );
 
             } else {
 
@@ -322,44 +380,53 @@ function hutangScreen() {
                     optionbulan,
                     optionTahun,
                     "filter",
+                    "",
+                    "",
+                    "",
                     ""
                 );
 
             }
         } else {
-            // const url = await printAllRequest(
-            //     kethutang,
-            //     0,
-            //     0,
-            //     optionfilter,
-            //     optionfiltertanggal,
-            //     tanggaldari,
-            //     tanggalsampai,
-            //     optionbulan,
-            //     optionTahun,
-            //     pilihan
-            // );
-            // setPdfUri(url);
-            // setShowAlertInfoDownload(true)
+            if (opsiqueryval === "Semua") {
+                Alert.alert("Peringatan!", "Harap pilih tanggal agar tidak terjadi overload pada data");
+                return;
+            }
+            const url = await PrntAllDataItem(
+                optionfilter,
+                kethutang,
+                pembayaranval,
+                opsiqueryval,
+                tanggaldari,
+                tanggalsampai,
+                opsival,
+                0,
+                0
+            );
+            setPdfUri(url);
+            setShowAlertInfoDownload(true)
         }
     };
 
     const onRefresh = useCallback((statusReq: string) => {
         setRefreshing(true);
         if (statusReq == "perItem") {
-            // fetchData(
-            //     kethutang,
-            //     0,
-            //     30,
-            //     optionfilter,
-            //     optionfiltertanggal,
-            //     "2025-01-01",
-            //     "2025-12-31",
-            //     optionbulan,
-            //     optionTahun,
-            //     '',
-            //     'perItem'
-            // );
+            fetchData(
+                kethutang,
+                0,
+                30,
+                optionfilter,
+                optionfiltertanggal,
+                "2025-01-01",
+                "2025-12-31",
+                optionbulan,
+                optionTahun,
+                '',
+                'perItem',
+                pembayaranval,
+                opsiqueryval,
+                opsival
+            );
         } else {
             fetchData(
                 kethutang,
@@ -371,6 +438,9 @@ function hutangScreen() {
                 "2025-12-31",
                 optionbulan,
                 optionTahun,
+                '',
+                '',
+                '',
                 '',
                 ''
             );
@@ -392,6 +462,9 @@ function hutangScreen() {
             "2025-12-31",
             optionbulan,
             optionTahun,
+            '',
+            '',
+            '',
             '',
             ''
         );
@@ -451,7 +524,7 @@ function hutangScreen() {
                     borderRadius: 15,
                     backgroundColor: "#fff",
                 }}
-                onPress={() => console.log(item.noinv)}
+                onPress={() => console.log(item.InvNum)}
             >
                 <View>
                     <View
@@ -462,7 +535,7 @@ function hutangScreen() {
                         }}
                     >
                         <Text style={{ fontWeight: "bold", color: "#585858" }}>
-                            Nomor PO : {item.nopo}
+                            Nomor Invoice : {item.InvNum}
                         </Text>
                     </View>
 
@@ -479,7 +552,22 @@ function hutangScreen() {
                         >
                             <Text>Tgl : </Text>
                             <Text style={{ width: 270, textAlign: "right" }}>
-                                {item.tanggal}
+                                {DateFormat(item.Tgl, "dd/mm/yyyy")}
+                            </Text>
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                marginTop: 5,
+                                borderBottomWidth: 0.3,
+                                paddingVertical: 5,
+                                borderStyle: "dashed"
+                            }}
+                        >
+                            <Text>Tgl. J/T : </Text>
+                            <Text style={{ width: 270, textAlign: "right" }}>
+                                {DateFormat(item.TglJT, "dd/mm/yyyy")}
                             </Text>
                         </View>
                         <View
@@ -494,7 +582,7 @@ function hutangScreen() {
                         >
                             <Text>Supplier : </Text>
                             <Text style={{ width: 270, textAlign: "right" }}>
-                                {item.supplier}
+                                {item.Nama == null || item.Nama === "" ? "-" : item.Nama}{" ( "}{item.Alamat == null || item.Alamat === "" ? "-" : item.Alamat} {" )"}
                             </Text>
                         </View>
                         <View
@@ -507,39 +595,9 @@ function hutangScreen() {
                                 borderStyle: "dashed"
                             }}
                         >
-                            <Text>Deskripsi : </Text>
-                            <Text style={{ width: 270, textAlign: "right" }}>
-                                {item.nama}
-                            </Text>
-                        </View>
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                marginTop: 5,
-                                borderBottomWidth: 0.3,
-                                paddingVertical: 5,
-                                borderStyle: "dashed"
-                            }}
-                        >
-                            <Text>Departemen : </Text>
+                            <Text>Tgl Lunas : </Text>
                             <Text style={{ textAlign: "right" }}>
-                                {item.departemen}
-                            </Text>
-                        </View>
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                marginTop: 5,
-                                borderBottomWidth: 0.3,
-                                paddingVertical: 5,
-                                borderStyle: "dashed"
-                            }}
-                        >
-                            <Text>No. Pesanan : </Text>
-                            <Text style={{ textAlign: "right" }}>
-                                {item.nomorpesanan}
+                                {item.TglLunas === "" || item.TglLunas == null ? "-" : DateFormat(item.TglLunas, "dd/mm/yyyy")}
                             </Text>
                         </View>
                     </View>
@@ -557,11 +615,11 @@ function hutangScreen() {
                         }}
                     >
                         <Text style={{ color: "#585858", fontSize: 12 }}>
-                            {"Qtty PO : " +
-                                item.qtypo +
-                                " | Qtty Beli : " + item.qtybeli +
-                                " | Sisa PO : " +
-                                (parseFloat(item.qtypo) - parseFloat(item.qtybeli))}
+                            {
+                                "Jumlah Hutang : " +
+                                formatNumber(item.Total) +
+                                " | Bayar : " + formatNumber(item.Bayar)
+                            }
                         </Text>
                     </View>
                 </View>
@@ -639,7 +697,7 @@ function hutangScreen() {
                     <Text style={{ color: peritem ? "#fff" : "#000" }}>
                         {peritem == false
                             ? "Lihat PerItem"
-                            : "Kembali PerPO"}
+                            : "Kembali PerGroup"}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -677,23 +735,46 @@ function hutangScreen() {
                     <View style={styles.modalOverlay} />
                 </TouchableWithoutFeedback>
 
-                <View style={styles.bottomModal}>
-                    <View>
-                        <View style={styles.pickerContainer}>
-                            <Picker
-                                selectedValue={optionfiltertanggal}
-                                style={styles.picker}
-                                onValueChange={(itemValue) => setoptionfiltertanggal(itemValue)}
-                            >
-                                <Picker.Item label="Semua" value="Semua" />
-                                <Picker.Item label="Tanggal" value="Tanggal" />
-                                <Picker.Item label="Bulan" value="Bulan" />
-                                <Picker.Item label="Tahun" value="Tahun" />
-                            </Picker>
-                        </View>
+                <ScrollView style={styles.bottomModal}>
+                    <View style={{marginBottom:100,paddingBottom:20}}>
+
+                        {peritem == false && statusprint === "" ? (
+
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={optionfiltertanggal}
+                                    style={styles.picker}
+                                    onValueChange={(itemValue) => setoptionfiltertanggal(itemValue)}
+                                >
+                                    <Picker.Item label="Semua" value="Semua" />
+                                    <Picker.Item label="Tanggal" value="Tanggal" />
+                                    <Picker.Item label="Bulan" value="Bulan" />
+                                    <Picker.Item label="Tahun" value="Tahun" />
+                                </Picker>
+
+                            </View>
+
+                        ) : (
+
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={opsiqueryval}
+                                    style={styles.picker}
+                                    onValueChange={(itemValue) => setOpsiQuery(itemValue)}
+                                >
+                                    <Picker.Item label="Semua" value="Semua" />
+                                    <Picker.Item label="TGL TRANSAKSI" value="TGL TRANSAKSI" />
+                                    <Picker.Item label="TGL J.T TRANSAKSI" value="TGL J.T TRANSAKSI" />
+                                    <Picker.Item label="TGL PELUNASAN" value="TGL PELUNASAN" />
+
+                                </Picker>
+
+                            </View>
+
+                        )}
 
                         {/* by tgl */}
-                        {optionfiltertanggal == "Tanggal" || optionfiltertanggal == "" ? (
+                        {opsiqueryval == "TGL TRANSAKSI" || optionfiltertanggal == "Tanggal" || optionfiltertanggal == "" || opsiqueryval == "TGL J.T TRANSAKSI" || opsiqueryval == "TGL PELUNASAN" ? (
                             <View
                                 style={{
                                     flexDirection: "row",
@@ -843,7 +924,7 @@ function hutangScreen() {
                             <Text style={{ fontSize: 17, marginBottom: 5 }}>Berdasarkan</Text>
 
                             {
-                                peritem == false ? (<View style={styles.pickerContainer}>
+                                peritem == false && statusprint === "" ? (<View style={styles.pickerContainer}>
                                     <Picker
                                         selectedValue={optionfilter}
                                         style={styles.picker}
@@ -859,7 +940,7 @@ function hutangScreen() {
                                         style={styles.picker}
                                         onValueChange={(itemValue) => setoptionfilter(itemValue)}
                                     >
-                                        <Picker.Item label="Nomor Bukti" value="Nomor Bukti" />
+                                        <Picker.Item label="Nomor Invoice" value="Nomor Invoice" />
                                         <Picker.Item label="Kode Supplier" value="Kode Supplier" />
                                         <Picker.Item label="Nama Supplier" value="Nama Supplier" />
                                     </Picker>
@@ -877,14 +958,28 @@ function hutangScreen() {
                             </View>
 
                             {
-                                statusprint === "print" ? (<View style={[styles.pickerContainer, { marginTop: 5 }]}><View>
-                                    <RadioButton.Group onValueChange={setPilihan} value={pilihan}>
+
+                                statusprint === "print" || peritem == true ? (<View><Text style={{ fontSize: 17, marginTop: 5, marginBottom: 5 }}>Pembayaran</Text><View style={[styles.pickerContainer, { marginTop: 5 }]}><View>
+
+                                    <RadioButton.Group onValueChange={setPembayaranVal} value={pembayaranval}>
+                                        <RadioButton.Item label="Semua" value="semua" />
+                                        <RadioButton.Item label="Cash" value="cash" />
+                                        <RadioButton.Item label="Kredit" value="kredit" />
+                                    </RadioButton.Group>
+                                </View></View></View>) : ""
+                            }
+
+
+                            {
+
+                                statusprint === "print" || peritem == true ? (<View><Text style={{ fontSize: 17, marginTop: 5, marginBottom: 5 }}>Pelunasan</Text><View style={[styles.pickerContainer, { marginTop: 5 }]}><View>
+
+                                    <RadioButton.Group onValueChange={setOpsiVal} value={opsival}>
                                         <RadioButton.Item label="Semua" value="semua" />
                                         <RadioButton.Item label="Sudah" value="sudah" />
                                         <RadioButton.Item label="Belum" value="belum" />
-                                        <RadioButton.Item label="Close" value="close" />
                                     </RadioButton.Group>
-                                </View></View>) : ""
+                                </View></View></View>) : ""
                             }
 
                             {
@@ -906,8 +1001,11 @@ function hutangScreen() {
 
                         </View>
 
-                        <View
-                            style={{ flexDirection: "row", justifyContent: "space-between" }}
+                        
+                    </View>
+                </ScrollView>
+                <View
+                            style={{ flexDirection: "row", justifyContent: "space-between",padding:20,backgroundColor:'#fff' }}
                         >
                             <TouchableOpacity
                                 onPress={() => {
@@ -960,8 +1058,6 @@ function hutangScreen() {
                                 </>
                             )}
                         </View>
-                    </View>
-                </View>
             </Modal>
 
             <CustomAlert
@@ -1015,6 +1111,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 20,
         padding: 20,
         elevation: 5,
+        maxHeight:600
     },
     modalTitle: {
         fontSize: 20,

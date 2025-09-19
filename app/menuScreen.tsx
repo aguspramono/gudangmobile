@@ -40,6 +40,7 @@ export default function HomeScreen() {
         { id: '7', label: 'Retur', icon: 'keyboard-return', color: '#A0C4FF', count: -1 },
         // { id: '8', label: 'Adjust', icon: 'adjust', color: '#A0C4FF', count: -1 },
          { id: '9', label: 'Hutang', icon: 'cash-100', color: '#A0C4FF', count: -1 },
+         { id: '10', label: 'B. Hutang', icon: 'cash-100', color: '#A0C4FF', count: -1 },
     ];
 
     const master = [
@@ -73,6 +74,8 @@ export default function HomeScreen() {
             router.navigate({ pathname: "returPenerimaanScreen" });
         }else if (itemId == "9") {
             router.navigate({ pathname: "hutangScreen" });
+        }else if (itemId == "10") {
+            router.navigate({ pathname: "hutangBayarScreen" });
         }
         Animated.sequence([
             Animated.timing(scaleAnim, { toValue: 1.1, duration: 100, useNativeDriver: true }),

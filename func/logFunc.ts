@@ -27,6 +27,18 @@ export const checkToken = async (data: FormData) => {
   }
 };
 
+// export const checkTokenByToken = async (data: FormData) => {
+//   try {
+//     const response = await axios.post(`${baseUrl}/checktokenbytoken`, data, { headers });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error logging request:", error);
+//     throw error;
+//   }
+// };
+
+
+
 export const getDatauserFun = async (data: FormData) => {
   try {
     const response = await axios.post(`${baseUrl}/user/getdatauser`, data, { headers });
@@ -70,6 +82,15 @@ export const deleteTokenNotifUser = async (data: FormData) => {
   }
 };
 
+export const deleteTokenNotifUserByTokenNotif = async (data: FormData) => {
+  try {
+    const response = await axios.post(`${baseUrl}/user/deletetokennotifbytokennotif`, data, { headers });
+    return response.data;
+  } catch (error) {
+    console.error("Error logging request:", error);
+    throw error;
+  }
+};
 
 export const checkLogin = async () => {
   const token = await getToken();

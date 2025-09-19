@@ -75,6 +75,7 @@ export default function pesananScreen() {
   };
 
   const handleDataPerItem = (status: string) => {
+    setoptionfiltertanggal("Semua");
     if (status == "perItem") {
       fetchData(
         "",
@@ -681,7 +682,7 @@ export default function pesananScreen() {
           <Text style={{ color: peritem ? "#fff" : "#000" }}>
             {peritem == false
               ? "Lihat PerItem"
-              : "Kembali PerPesanan"}
+              : "Kembali PerGroup"}
           </Text>
         </TouchableOpacity>
 

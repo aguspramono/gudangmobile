@@ -11,7 +11,7 @@ import {
   Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { logRequest } from "./../func/logFunc"
+import { logRequest,deleteTokenNotifUserByTokenNotif } from "./../func/logFunc"
 import { router, useFocusEffect } from "expo-router";
 import { useShallow } from "zustand/react/shallow";
 import useLogin from "./../func/store/useUserLogin";
@@ -48,6 +48,8 @@ const LoginScreen = () => {
     const response = await chekPremissionAndGetToken();
     setToken(response);
   }
+
+
 
   const handleLogin = () => {
     checkprem();

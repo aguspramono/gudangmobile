@@ -34,7 +34,7 @@ const ProfileScreen = () => {
         const response = await getDatauserFun(bodyFormData);
         setNamaUser(response.datauser[0]['NamaPeg']);
     }
-
+    
     const handleLogout = async () =>{
         var bodyFormData = new FormData();
         bodyFormData.append('username', userName);
