@@ -81,6 +81,7 @@ const LoginScreen = () => {
       return;
     }
 
+
     var bodyFormData = new FormData();
     bodyFormData.append('username', user);
     bodyFormData.append('password', password);

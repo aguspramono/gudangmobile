@@ -43,8 +43,8 @@ const ProfileScreen = () => {
         router.navigate("/");
     }
 
-    const MenuItem = ({ title, icon, isLogout }) => (
-        <TouchableOpacity style={styles.menuItem} onPress={()=> isLogout?handleLogout():console.log}>
+    const MenuItem = ({ title, icon, isLogout,param }) => (
+        <TouchableOpacity style={styles.menuItem} onPress={()=> isLogout?handleLogout():param=="1"?router.navigate({ pathname: "ubahPasswordScreen" }):router.navigate({ pathname: "ubahProfileScreen" })}>
             <Ionicons name={icon} size={20} color={isLogout ? 'tomato' : '#555'} />
             <Text style={[styles.menuText, isLogout && { color: 'tomato' }]}>{title}</Text>
             <Ionicons name="chevron-forward" size={20} color="#ccc" style={{ marginLeft: 'auto' }} />
@@ -76,9 +76,9 @@ const ProfileScreen = () => {
       </View>
 
       <View style={styles.menuList}>
-        <MenuItem title="Ubah Profile" icon="create-outline" isLogout={false}/>
-        <MenuItem title="Ubah Password" icon="create-outline" isLogout={false}/>
-        <MenuItem title="Logout" icon="log-out-outline" isLogout />
+        <MenuItem title="Ubah Profile" icon="person" isLogout={false} param="0"/>
+        <MenuItem title="Ubah Password" icon="key" isLogout={false} param="1"/>
+        <MenuItem title="Logout" icon="log-out-outline" isLogout param="" />
       </View>
 
       <View style={{marginTop:30}}><Text style={{textAlign:'center'}}>PT. Swastisiddhi Amagra</Text><Text style={{textAlign:'center'}}>V 1.0</Text></View>
@@ -88,8 +88,6 @@ const ProfileScreen = () => {
     
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {

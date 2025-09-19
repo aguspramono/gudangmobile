@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, RefreshControl } from 'react-native';
-import { View, Text, StyleSheet, FlatList, StatusBar, Animated, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Animated, TouchableOpacity, Image } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { getAllPesananRequest } from './../func/pesananFunc';
 import { router, useFocusEffect } from "expo-router";
 import { useShallow } from "zustand/react/shallow";
 import useLogin from "./../func/store/useUserLogin";
+import { StatusBar } from "expo-status-bar";
 
 export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -68,6 +69,7 @@ export default function HomeScreen() {
       router.navigate({ pathname: "terimaScreen" });
     }else if(itemId=="3"){
       router.navigate({ pathname: "menuScreen" });
+      //router.navigate({ pathname: "kasirscreen" });
     }
     Animated.sequence([
       Animated.timing(scaleAnim, { toValue: 1.1, duration: 100, useNativeDriver: true }),
@@ -190,7 +192,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar style="dark"/>
       <View style={styles.headerProfile}>
         <Text style={{ color: '#585858', fontWeight: 'bold', fontSize: 16,textTransform:'capitalize' }}>Hi, {namaUser}!</Text>
         <TouchableOpacity style={styles.avatarContainer} onPress={handleProfile}>

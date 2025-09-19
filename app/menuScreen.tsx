@@ -71,6 +71,8 @@ export default function HomeScreen() {
             router.navigate({ pathname: "closingOrderScreen" });
         }else if (itemId == "7") {
             router.navigate({ pathname: "returPenerimaanScreen" });
+        }else if (itemId == "9") {
+            router.navigate({ pathname: "hutangScreen" });
         }
         Animated.sequence([
             Animated.timing(scaleAnim, { toValue: 1.1, duration: 100, useNativeDriver: true }),
