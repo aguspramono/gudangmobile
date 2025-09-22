@@ -10,6 +10,7 @@
     "android": {
       "package": "com.aguspramono.gudangapp",
       "useNextNotificationsApi": true,
+      "usesCleartextTraffic": true,
       "googleServicesFile": "./android/app/google-services.json",
       "icon": "./assets/images/MyICS.png"
     },

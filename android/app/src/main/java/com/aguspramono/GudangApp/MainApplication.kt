@@ -1,4 +1,4 @@
-package com.aguspramono.GudangApp
+package com.aguspramono.gudangapp
 
 import android.app.Application
 import android.content.res.Configuration

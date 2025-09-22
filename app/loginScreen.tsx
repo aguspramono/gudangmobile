@@ -55,25 +55,29 @@ const LoginScreen = () => {
   const handleLogin = async () => {
 
 
-    await axios.get('https://gudangapi.koneksiorangdalam.com/stocklunashutang/alldatabyid?noBukti=BK 25052104')
-      .then(function (response) {
-        // handle success
-        console.log("=========================");
-        console.log(response);
-      })
-      .catch(function (error) {
-        // handle error
-        console.log("=========================");
-        console.log(error);
-      })
-      .finally(function () {
-        // always executed
-      });
+try {
+  const noBukti = "BK 25052104";
+  const url = `http://gudangapi.koneksiorangdalam.com/stocklunashutang/alldatabyid?noBukti=${encodeURIComponent(noBukti)}`;
 
+  const response = await axios.get(url); // gak perlu header aneh-aneh
+  return response.data;
 
+} catch (error) {
+  console.log("❌ Axios Error");
+  if (error.response) {
+    console.log("Status:", error.response.status);
+    console.log("Headers:", error.response.headers);
+    console.log("Data:", error.response.data);
+  } else if (error.request) {
+    console.log("No response received from server");
+    console.log("Request:", error.request);
+  } else {
+    console.log("Error Message:", error.message);
+  }
+  throw error;
+}
 
-
-    return
+  
     checkprem();
 
     if (token === null || token === "") {
