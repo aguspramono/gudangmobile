@@ -196,8 +196,9 @@ export default function HomeScreen() {
       <View style={styles.headerProfile}>
         <Text style={{ color: '#585858', fontWeight: 'bold', fontSize: 16,textTransform:'capitalize' }}>Hi, {namaUser}!</Text>
         <TouchableOpacity style={styles.avatarContainer} onPress={handleProfile}>
+
           <Image
-            source={{ uri: 'https://i.pravatar.cc/100' }} // Ganti dengan avatar user
+            source={require('./../assets/images/user.png')} // Ganti dengan avatar user
             style={styles.avatar}
           />
         </TouchableOpacity>

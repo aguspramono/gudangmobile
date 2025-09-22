@@ -54,30 +54,37 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
 
+    // // try {
+    // //   const noBukti = "BK 25052104";
+    // //   const url = `https://gudangapi.koneksiorangdalam.com/stocklunashutang/alldatabyid?noBukti=${encodeURIComponent(noBukti)}`;
 
-try {
-  const noBukti = "BK 25052104";
-  const url = `http://gudangapi.koneksiorangdalam.com/stocklunashutang/alldatabyid?noBukti=${encodeURIComponent(noBukti)}`;
+    // //   const response = await axios.get(url);
+    // //   console.log(response);
+    // //   return response.data;
 
-  const response = await axios.get(url); // gak perlu header aneh-aneh
-  return response.data;
+    // // } catch (error) {
+    // //   console.log(error);
+    // //   console.log("❌ Axios Error");
+    // //   if (error.response) {
+    // //     console.log("Status:", error.response.status);
+    // //     console.log("Headers:", error.response.headers);
+    // //     console.log("Data:", error.response.data);
+    // //   } else if (error.request) {
+    // //     console.log("No response received from server");
+    // //     console.log("Request:", error.request);
+    // //   } else {
+    // //     console.log("Error Message:", error.message);
+    // //   }
+    // //   throw error;
+    // // }
 
-} catch (error) {
-  console.log("❌ Axios Error");
-  if (error.response) {
-    console.log("Status:", error.response.status);
-    console.log("Headers:", error.response.headers);
-    console.log("Data:", error.response.data);
-  } else if (error.request) {
-    console.log("No response received from server");
-    console.log("Request:", error.request);
-  } else {
-    console.log("Error Message:", error.message);
-  }
-  throw error;
-}
+    //  fetch("https://gudangapi.koneksiorangdalam.com/stocklunashutang/alldatabyid?noBukti=BK%2025052104")
+    // .then(res => res.json())
+    // .then(data => console.log("✅ fetch success", data))
+    // .catch(err => console.log("❌ fetch error", err));
 
-  
+    // return;
+
     checkprem();
 
     if (token === null || token === "") {

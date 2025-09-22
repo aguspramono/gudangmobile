@@ -62,7 +62,7 @@ const ProfileScreen = () => {
 
       <View style={styles.profileCard}>
         <Image
-          source={{ uri: 'https://i.pravatar.cc/100' }}
+          source={require('./../assets/images/user.png')}
           style={styles.profileImage}
         />
         <Text style={styles.name}>{namaUser}</Text>

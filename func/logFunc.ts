@@ -13,7 +13,20 @@ export const logRequest = async (data: FormData) => {
     return response.data;
   } catch (error) {
     console.error("Error logging request:", error);
-    throw error;
+    console.log(error);
+      console.log("❌ Axios Error");
+      if (error.response) {
+        console.log("Status:", error.response.status);
+        console.log("Headers:", error.response.headers);
+        console.log("Data:", error.response.data);
+      } else if (error.request) {
+        console.log("No response received from server");
+        console.log("Request:", error.request);
+      } else {
+        console.log("Error Message:", error.message);
+      }
+      throw error;
+    //throw error;
   }
 };
 
