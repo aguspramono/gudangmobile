@@ -53,7 +53,29 @@ const LoginScreen = () => {
 
 
   const handleLogin = async () => {
+
+
+    await axios.get('https://gudangapi.koneksiorangdalam.com/stocklunashutang/alldatabyid?noBukti=BK 25052104')
+      .then(function (response) {
+        // handle success
+        console.log("=========================");
+        console.log(response);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log("=========================");
+        console.log(error);
+      })
+      .finally(function () {
+        // always executed
+      });
+
+
+
+
+    return
     checkprem();
+
     if (token === null || token === "") {
       Alert.alert(
         'Izin Diperlukan',

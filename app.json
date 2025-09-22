@@ -1,17 +1,17 @@
 {
   "expo": {
-    "scheme": "acme",
+    "name": "MyICS",
+    "slug": "GudangApp",
+    "scheme": "gudangapp",
     "plugins": [
       "expo-router",
       "expo-notifications"
     ],
-    "name": "MyICS",
-    "slug": "GudangApp",
     "android": {
-      "package": "com.aguspramono.GudangApp",
+      "package": "com.aguspramono.gudangapp",
       "useNextNotificationsApi": true,
       "googleServicesFile": "./android/app/google-services.json",
-      "icon":"./assets/images/MyICS.png"
+      "icon": "./assets/images/MyICS.png"
     },
     "extra": {
       "router": {},
