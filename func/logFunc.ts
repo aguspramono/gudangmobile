@@ -27,17 +27,6 @@ export const checkToken = async (data: FormData) => {
   }
 };
 
-// export const checkTokenByToken = async (data: FormData) => {
-//   try {
-//     const response = await axios.post(`${baseUrl}/checktokenbytoken`, data, { headers });
-//     return response.data;
-//   } catch (error) {
-//     console.error("Error logging request:", error);
-//     throw error;
-//   }
-// };
-
-
 
 export const getDatauserFun = async (data: FormData) => {
   try {

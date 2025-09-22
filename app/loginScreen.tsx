@@ -11,13 +11,14 @@ import {
   Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { logRequest,deleteTokenNotifUserByTokenNotif } from "./../func/logFunc"
+import { logRequest, deleteTokenNotifUserByTokenNotif } from "./../func/logFunc"
 import { router, useFocusEffect } from "expo-router";
 import { useShallow } from "zustand/react/shallow";
 import useLogin from "./../func/store/useUserLogin";
 import { saveToken } from './../func/global/authStorage';
 import { chekPremissionAndGetToken } from "./../func/global/premissionNotif";
 import * as Linking from 'expo-linking';
+import axios from 'axios';
 
 const LoginScreen = () => {
   const [user, setUser] = useState('');
@@ -25,7 +26,7 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [token, setToken] = useState(null);
 
-    const {
+  const {
     isLogin,
     setLogin,
     userName,
@@ -38,47 +39,46 @@ const LoginScreen = () => {
       setLogin: state.setLogin,
       userName: state.userName,
       setUserName: state.setUserName,
-      namaUser:state.namaUser,
-      setNamaUser:state.setNamaUser
+      namaUser: state.namaUser,
+      setNamaUser: state.setNamaUser
 
     }))
   );
 
-  const checkprem = async() =>{
+  const checkprem = async () => {
     const response = await chekPremissionAndGetToken();
     setToken(response);
   }
 
 
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     checkprem();
-    
-    if(token===null || token===""){
+    if (token === null || token === "") {
       Alert.alert(
         'Izin Diperlukan',
         'Aplikasi membutuhkan izin notifikasi. Buka pengaturan untuk mengaktifkannya.',
         [
-            {
+          {
             text: 'Buka Pengaturan',
             onPress: () => {
-                if (Platform.OS === 'ios') {
+              if (Platform.OS === 'ios') {
                 Linking.openURL('app-settings:');
-                } else {
+              } else {
                 Linking.openSettings();
-                }
+              }
             },
-            }
+          }
         ]
-        );
+      );
       return;
     }
-    if(user===''){
+    if (user === '') {
       Alert.alert('Error', 'Username harus diisi.');
       return;
     }
 
-    if(password===''){
+    if (password === '') {
       Alert.alert('Error', 'Password harus diisi.');
       return;
     }
@@ -90,10 +90,10 @@ const LoginScreen = () => {
     bodyFormData.append('tokennotif', token);
     logRequest(bodyFormData)
       .then(async response => {
-        if(response["status"]=="error"){
+        if (response["status"] == "error") {
           Alert.alert('Error', response["message"]);
           return;
-        }else{
+        } else {
           await saveToken(response.datauser[0]["tokenLog"]);
           setNamaUser(response.datauser[0]["NamaPeg"]);
           setUserName(user);
@@ -108,9 +108,9 @@ const LoginScreen = () => {
       });
   };
 
-    useEffect(() => {
-      checkprem();
-    }, []);
+  useEffect(() => {
+    checkprem();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
