@@ -7,6 +7,12 @@
       "expo-router",
       "expo-notifications"
     ],
+    "splash": {
+        "image": "./assets/images/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
+    },
+    "icon": "./assets/images/MyICS.png",
     "android": {
       "package": "com.aguspramono.gudangapp",
       "useNextNotificationsApi": true,

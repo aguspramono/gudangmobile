@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { ScrollView, RefreshControl } from 'react-native';
+import React, { useEffect, useState, useCallback,useRef } from 'react';
+import { ScrollView, RefreshControl,BackHandler,ToastAndroid } from 'react-native';
 import { View, Text, StyleSheet, FlatList, Animated, TouchableOpacity, Image } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { getAllPesananRequest } from './../func/pesananFunc';
@@ -8,11 +8,13 @@ import { useShallow } from "zustand/react/shallow";
 import useLogin from "./../func/store/useUserLogin";
 import { StatusBar } from "expo-status-bar";
 
+
 export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedOrderBarang, setSelectedOrderBarang] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const scaleAnim = new Animated.Value(1);
+  const lastBackPressed = useRef(0);
 
   const [pesananbarang, setPesananBarang] = useState<any[]>([]);
 
@@ -183,6 +185,27 @@ export default function HomeScreen() {
   useFocusEffect(
         useCallback(() => {
         getDataPesananBarang();
+
+        const backAction = () => {
+                  const timeNow = Date.now();
+                  if (lastBackPressed.current && timeNow - lastBackPressed.current < 2000) {
+                    BackHandler.exitApp();
+                    return true;
+                  }
+        
+                  lastBackPressed.current = timeNow;
+                  ToastAndroid.show('Tekan kembali sekali lagi untuk keluar', ToastAndroid.SHORT);
+                  return true;
+              };
+        
+              const backHandler = BackHandler.addEventListener(
+                'hardwareBackPress',
+                backAction,
+              );
+        
+              return () => backHandler.remove();
+
+
       }, [])
   );
 

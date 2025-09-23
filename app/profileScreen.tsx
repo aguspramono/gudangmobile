@@ -70,7 +70,7 @@ const ProfileScreen = () => {
 
         <View style={styles.infoRow}>
           <View style={styles.infoBox}>
-            <Text style={styles.infoLabel}>"Setiap hari adalah kesempatan baru untuk menjadi versi terbaik dari diri kita"</Text>
+            <Text style={styles.infoLabel}>"Kerja...Kerja....Kerjaaa ! By Jokowidodo"</Text>
           </View>
         </View>
       </View>
