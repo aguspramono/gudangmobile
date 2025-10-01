@@ -202,9 +202,7 @@ export default function HomeScreen() {
                 'hardwareBackPress',
                 backAction,
               );
-        
               return () => backHandler.remove();
-
 
       }, [])
   );
